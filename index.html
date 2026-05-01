@@ -153,7 +153,6 @@
             // 2. 엑셀(CSV) 다운로드
             const handleExportExcel = () => {
                 setIsExportMenuOpen(false);
-                // 한글 깨짐 방지를 위한 BOM 문자 추가
                 let csvContent = "\uFEFF날짜,요일,운전봉사(1명),일반봉사(1),일반봉사(2)\n";
 
                 getCalendarDays().forEach(date => {
@@ -182,7 +181,7 @@
                 document.body.removeChild(link);
             };
 
-            // 3. PDF 다운로드 (html2pdf 사용)
+            // 3. PDF 다운로드
             const handleExportPDF = () => {
                 setIsExportMenuOpen(false);
                 const element = document.getElementById('calendar-export-area');
@@ -332,23 +331,23 @@
                                 </h1>
                             </div>
                             
-                            {/* 새로고침 및 출력 버튼 그룹 */}
-                            <div className="flex gap-2 relative">
-                                <button onClick={handleRefresh} className="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full shadow-sm text-xs font-bold active:bg-gray-100 flex items-center">
-                                    <RefreshIcon className="w-3.5 h-3.5 mr-1" /> 새로고침
+                            {/* 새로고침 및 출력 버튼 그룹 (버튼 크기 대폭 확대) */}
+                            <div className="flex gap-2 sm:gap-3 relative">
+                                <button onClick={handleRefresh} className="bg-white border border-gray-200 text-gray-700 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full shadow-sm text-sm sm:text-base font-bold active:bg-gray-100 flex items-center transition-colors">
+                                    <RefreshIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5" /> 새로고침
                                 </button>
                                 
                                 <div className="relative">
-                                    <button onClick={() => setIsExportMenuOpen(!isExportMenuOpen)} className="bg-orange-600 text-white px-3 py-1.5 rounded-full shadow-sm text-xs font-bold active:bg-orange-700 flex items-center">
-                                        <DownloadIcon className="w-3.5 h-3.5 mr-1" /> 출력
+                                    <button onClick={() => setIsExportMenuOpen(!isExportMenuOpen)} className="bg-orange-600 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-full shadow-sm text-sm sm:text-base font-bold active:bg-orange-700 flex items-center transition-colors">
+                                        <DownloadIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5" /> 출력
                                     </button>
                                     
-                                    {/* 출력 드롭다운 메뉴 */}
+                                    {/* 출력 드롭다운 메뉴 (메뉴 크기 및 터치 영역 확대) */}
                                     {isExportMenuOpen && (
-                                        <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-100 rounded-xl shadow-xl z-50 overflow-hidden">
-                                            <button onClick={handleExportExcel} className="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center"><TableIcon className="w-4 h-4 mr-2 text-green-600"/> 엑셀</button>
-                                            <button onClick={handleExportPDF} className="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center border-t border-gray-50"><FileTextIcon className="w-4 h-4 mr-2 text-red-500"/> PDF</button>
-                                            <button onClick={handlePrint} className="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center border-t border-gray-50"><PrinterIcon className="w-4 h-4 mr-2 text-gray-600"/> 인쇄</button>
+                                        <div className="absolute right-0 mt-2 w-36 sm:w-40 bg-white border border-gray-100 rounded-xl shadow-xl z-50 overflow-hidden">
+                                            <button onClick={handleExportExcel} className="w-full text-left px-4 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-gray-700 hover:bg-gray-50 flex items-center"><TableIcon className="w-5 h-5 mr-2.5 text-green-600"/> 엑셀 저장</button>
+                                            <button onClick={handleExportPDF} className="w-full text-left px-4 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-gray-700 hover:bg-gray-50 flex items-center border-t border-gray-50"><FileTextIcon className="w-5 h-5 mr-2.5 text-red-500"/> PDF 저장</button>
+                                            <button onClick={handlePrint} className="w-full text-left px-4 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-gray-700 hover:bg-gray-50 flex items-center border-t border-gray-50"><PrinterIcon className="w-5 h-5 mr-2.5 text-gray-600"/> 화면 인쇄</button>
                                         </div>
                                     )}
                                 </div>
@@ -553,10 +552,3 @@
     </script>
 </body>
 </html>
-```eof
-
-### 추가된 기능 안내
-1. **상단 버튼 추가:** 로고 제목 옆에 **[새로고침]**과 **[출력]** 버튼을 깔끔하게 배치했습니다.
-2. **엑셀(CSV) 저장:** 출력 -> '엑셀'을 누르시면, 선택된 월의 일정 데이터가 한글 깨짐 없이 `2024년_5월_봉사일정.csv` 파일로 바탕화면이나 다운로드 폴더에 자동 저장됩니다.
-3. **PDF 저장:** 출력 -> 'PDF'를 누르시면, 달력 형태 그대로 사진을 찍듯 고화질 PDF 문서로 즉시 저장됩니다!
-4. **인쇄 깔끔하게:** 인쇄하기를 누를 때 쓸데없는 버튼이나 여백은 모두 자동으로 숨겨지고, 딱 '몇 년 몇 월 봉사일정'이라는 큼직한 제목과 달력 표만 A4 용지에 꽉 차게 프린트되도록 맞춤 설정해 두었습니다.
