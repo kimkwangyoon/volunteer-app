@@ -85,20 +85,20 @@
             });
             const [schedule, setSchedule] = useState({});
             
-            // 달력에서 터치하여 '선택된 날짜'를 저장하는 상태
             const [selectedDateStr, setSelectedDateStr] = useState('');
             
-            // 모달 상태
             const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
             const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
             
-            // 입력 상태
             const [applyDate, setApplyDate] = useState(''); 
             const [deleteDate, setDeleteDate] = useState(''); 
             const [applicantName, setApplicantName] = useState('');
             const [applicantPin, setApplicantPin] = useState('');
             const [deletePinInput, setDeletePinInput] = useState('');
             const [applicantRole, setApplicantRole] = useState('general');
+            
+            // 💡 중복된 비밀번호를 가진 신청자들을 임시로 저장하는 상태
+            const [matchedCandidates, setMatchedCandidates] = useState([]);
             
             const [formError, setFormError] = useState('');
             const [toastMessage, setToastMessage] = useState({ show: false, message: '', type: '' });
@@ -143,7 +143,6 @@
                 });
             }, []);
 
-            // 🔄 수동 동기화 확인
             const handleRefresh = async () => {
                 if (!user) { showToast('서버에 연결 중입니다.', 'error'); return; }
                 showToast('최신 일정을 확인하는 중입니다...', 'info');
@@ -234,22 +233,13 @@
                 return date.getDay() === 0 || date.getDay() === 6;
             };
 
-            // 👆 [핵심 수정] 달력 날짜 터치 로직
             const handleDayClick = (date) => {
-                if (!date) {
-                    setSelectedDateStr('');
-                    return;
-                }
+                if (!date) { setSelectedDateStr(''); return; }
                 const dayOfWeek = date.getDay();
-                if (dayOfWeek === 0 || dayOfWeek === 6) {
-                    showToast('주말 및 공휴일은 봉사가 없습니다.', 'error');
-                    return;
-                }
+                if (dayOfWeek === 0 || dayOfWeek === 6) { showToast('주말 및 공휴일은 봉사가 없습니다.', 'error'); return; }
                 
                 const clickedDateStr = formatDate(date);
-                
                 if (selectedDateStr === clickedDateStr) {
-                    // 1. 이미 선택된 날짜를 한 번 더 터치한 경우 -> 즉시 신청 창 열기
                     setApplyDate(clickedDateStr);
                     setApplicantName('');
                     setApplicantPin('');
@@ -257,12 +247,10 @@
                     setFormError('');
                     setIsApplyModalOpen(true);
                 } else {
-                    // 2. 처음 터치한 경우 -> 강조(선택) 표시만 하기
                     setSelectedDateStr(clickedDateStr);
                 }
             };
 
-            // 📝 새로운 신청 제출
             const handleApplySubmit = async (e) => {
                 e.preventDefault();
                 if (!user) { setFormError('서버 연결 중입니다. 잠시 후 시도해주세요.'); return; }
@@ -284,7 +272,7 @@
 
                 try {
                     setIsApplyModalOpen(false);
-                    setSelectedDateStr(''); // 신청 완료 후 선택 해제
+                    setSelectedDateStr(''); 
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'schedules', applyDate);
                     await setDoc(docRef, newDayData);
                     showToast(`${applyDate.split('-')[2]}일 신청 완료`, 'success');
@@ -293,7 +281,7 @@
                 }
             };
 
-            // 🗑️ 통합된 삭제 제출 로직
+            // 🗑️ 수정된 삭제 확인 버튼 동작 (동일 비밀번호 검사 추가)
             const handleDeleteSubmit = async (e) => {
                 e.preventDefault();
                 if (!deleteDate) { setFormError('취소하실 날짜를 선택해주세요.'); return; }
@@ -305,30 +293,58 @@
                     return;
                 }
 
-                let isDeleted = false;
-                let newDayData = { ...currentDayData, general: [...currentDayData.general] };
-
-                if (newDayData.driver && newDayData.driver.pin === deletePinInput) {
-                    newDayData.driver = null;
-                    isDeleted = true;
-                } else {
-                    const initialLen = newDayData.general.length;
-                    newDayData.general = newDayData.general.filter(p => p.pin !== deletePinInput);
-                    if (newDayData.general.length < initialLen) isDeleted = true;
+                // 비밀번호가 일치하는 대상들을 찾습니다.
+                const matches = [];
+                if (currentDayData.driver && currentDayData.driver.pin === deletePinInput) {
+                    matches.push({ role: 'driver', name: currentDayData.driver.name });
                 }
+                currentDayData.general.forEach((person, idx) => {
+                    if (person.pin === deletePinInput) {
+                        matches.push({ role: 'general', index: idx, name: person.name });
+                    }
+                });
 
-                if (!isDeleted) {
+                // 일치하는 대상이 없으면 에러
+                if (matches.length === 0) {
                     setFormError('비밀번호가 일치하는 신청 내역을 찾을 수 없습니다.');
                     return;
                 }
 
+                // 일치하는 대상이 딱 1명이면 즉시 지워줍니다.
+                if (matches.length === 1) {
+                    executeDelete(matches[0]);
+                } 
+                // 일치하는 대상이 2명 이상이면, 선택할 수 있는 화면으로 넘겨줍니다.
+                else {
+                    setMatchedCandidates(matches);
+                    setFormError('');
+                }
+            };
+
+            // 🎯 실제 데이터베이스에서 대상을 삭제하는 핵심 함수
+            const executeDelete = async (target) => {
+                const currentDayData = schedule[deleteDate];
+                let newDayData = { ...currentDayData, general: [...currentDayData.general] };
+
+                if (target.role === 'driver') {
+                    newDayData.driver = null;
+                } else if (target.role === 'general') {
+                    // 선택한 일반 봉사자의 순번(index)을 배열에서 제거합니다.
+                    newDayData.general.splice(target.index, 1);
+                }
+
                 try {
                     setIsDeleteModalOpen(false);
-                    setSelectedDateStr(''); // 취소 완료 후 선택 해제
+                    setSelectedDateStr('');
+                    setMatchedCandidates([]); // 다음 번을 위해 초기화
+                    setDeletePinInput('');
+                    
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'schedules', deleteDate);
+                    // 운전자도 없고 일반 봉사자도 없게 되면, 문서를 완전히 지워서 달력을 깨끗하게 만듭니다.
                     if (!newDayData.driver && newDayData.general.length === 0) await deleteDoc(docRef);
                     else await setDoc(docRef, newDayData);
-                    showToast('신청 내역이 취소되었습니다.', 'success');
+                    
+                    showToast('신청 내역이 안전하게 취소되었습니다.', 'success');
                 } catch(err) {
                     showToast('서버 오류로 취소에 실패했습니다.', 'error');
                 }
@@ -336,7 +352,7 @@
 
             return (
                 <div className="min-h-[100dvh] bg-gray-50 flex flex-col font-sans pb-24">
-                    {/* 상단 헤더 영역 */}
+                    {/* 상단 헤더 */}
                     <header className="bg-orange-50 px-4 py-5 border-b border-orange-100 flex flex-col gap-4 print-hide">
                         <div className="flex justify-between items-start">
                             <div>
@@ -374,7 +390,7 @@
                         </div>
                     )}
 
-                    {/* === 메인 달력 영역 === */}
+                    {/* 메인 달력 */}
                     <div id="calendar-export-area" className="flex-1 bg-gray-50 pt-4 pb-4">
                         <div className="flex items-center bg-white rounded-full p-1 shadow-sm border border-gray-200 justify-between max-w-sm mx-auto w-full mb-4 print-hide">
                             <button onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)); setSelectedDateStr(''); }} className="p-2 text-orange-600 active:bg-orange-100 rounded-full">
@@ -413,7 +429,6 @@
                                     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
                                     const daySchedule = schedule[dateStr] || { driver: null, general: [] };
                                     
-                                    // 현재 날짜 상태들 확인
                                     const isToday = formatDate(new Date()) === dateStr;
                                     const isSelected = selectedDateStr === dateStr;
 
@@ -432,7 +447,6 @@
                                             
                                             {!isWeekend && (
                                                 <div className="space-y-0.5">
-                                                    {/* 운전자 항목 */}
                                                     {daySchedule.driver && (
                                                         <div className="bg-blue-50 border border-blue-100 text-blue-700 text-[10px] sm:text-xs rounded px-1 py-1 flex items-center justify-between">
                                                             <span className="truncate w-full flex items-center">
@@ -447,7 +461,6 @@
                                                         </div>
                                                     )}
                                                     
-                                                    {/* 일반 봉사자 항목 */}
                                                     {daySchedule.general.map((person, i) => (
                                                         <div key={i} className="bg-green-50 border border-green-100 text-green-700 text-[10px] sm:text-xs rounded px-1 py-1 flex items-center justify-between">
                                                             <span className="truncate w-full flex items-center">
@@ -463,11 +476,9 @@
                             </div>
                         </div>
                     </div>
-                    {/* === PDF/인쇄 캡처 영역 끝 === */}
 
-                    {/* 🚀 하단 고정 신청/취소 대형 버튼 */}
+                    {/* 하단 고정 버튼 */}
                     <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-200 p-3 sm:p-4 pb-safe flex gap-3 z-30 print-hide shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
-                        {/* 신청 버튼 */}
                         <button 
                             onClick={() => { 
                                 setApplyDate(selectedDateStr || ''); 
@@ -482,12 +493,12 @@
                             <PencilIcon className="w-6 h-6 mr-2" /> 신청하기
                         </button>
                         
-                        {/* 취소 버튼 */}
                         <button 
                             onClick={() => { 
                                 setDeleteDate(selectedDateStr || ''); 
                                 setDeletePinInput(''); 
                                 setFormError(''); 
+                                setMatchedCandidates([]); // 취소창 열 때 혹시 모를 이전 정보 초기화
                                 setIsDeleteModalOpen(true); 
                             }} 
                             className="flex-1 bg-gray-200 text-gray-800 font-bold text-lg py-4 rounded-2xl shadow-md active:bg-gray-300 flex items-center justify-center transition-transform active:scale-95"
@@ -549,42 +560,78 @@
                     {isDeleteModalOpen && (
                         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 print-hide">
                             <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-xl font-bold text-gray-900 flex items-center">
-                                        <TrashIcon className="w-6 h-6 mr-2 text-gray-500" /> 신청 취소
-                                    </h3>
-                                    <button onClick={() => setIsDeleteModalOpen(false)} className="text-gray-400 bg-gray-100 p-2 rounded-full active:bg-gray-200"><XIcon className="w-5 h-5" /></button>
-                                </div>
                                 
-                                <form onSubmit={handleDeleteSubmit} className="space-y-5">
-                                    {formError && (<div className="bg-red-50 p-3 rounded-xl flex items-start text-red-600 text-sm font-medium border border-red-100"><AlertCircle className="w-5 h-5 mr-1.5 shrink-0" /> {formError}</div>)}
-                                    
+                                {/* 💡 같은 비밀번호를 쓰는 사람이 2명 이상 발견되었을 때 보여주는 리스트 화면 */}
+                                {matchedCandidates.length > 0 ? (
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">취소할 날짜</label>
-                                        <input 
-                                            type="date" 
-                                            value={deleteDate} 
-                                            onChange={(e) => { setDeleteDate(e.target.value); setFormError(''); }} 
-                                            className="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-base outline-none focus:border-gray-500 focus:bg-white transition-colors cursor-pointer font-bold text-gray-800" 
-                                        />
+                                        <h3 className="text-xl font-bold text-gray-900 flex items-center mb-6">
+                                            <TrashIcon className="w-6 h-6 mr-2 text-gray-500" /> 취소할 봉사자 선택
+                                        </h3>
+                                        <p className="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                            같은 비밀번호로 신청된 내역이 여러 개 있습니다. <strong>어떤 봉사 내역을 취소할지 선택</strong>해주세요.
+                                        </p>
+                                        
+                                        <div className="space-y-3 mb-6">
+                                            {matchedCandidates.map((candidate, idx) => (
+                                                <button 
+                                                    key={idx}
+                                                    onClick={() => executeDelete(candidate)}
+                                                    className="w-full p-4 rounded-2xl border-2 border-gray-200 flex justify-between items-center bg-white active:bg-red-50 hover:border-red-300 transition-colors"
+                                                >
+                                                    <div className="flex items-center">
+                                                        {candidate.role === 'driver' ? <CarIcon className="w-5 h-5 mr-3 text-blue-500"/> : <UserIcon className="w-5 h-5 mr-3 text-green-500"/>}
+                                                        <span className="font-bold text-lg text-gray-800">
+                                                            {candidate.name} 
+                                                            <span className="text-sm font-normal text-gray-500 ml-1">({candidate.role === 'driver' ? '운전' : '일반'})</span>
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-red-500 text-sm font-bold bg-red-50 px-3 py-1.5 rounded-lg border border-red-100">삭제</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <button onClick={() => setMatchedCandidates([])} className="w-full py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold text-base active:bg-gray-200">이전으로 돌아가기</button>
                                     </div>
+                                ) : (
+                                    /* 💡 평소에 보여주는 취소 비밀번호 입력 화면 */
+                                    <div>
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                                                <TrashIcon className="w-6 h-6 mr-2 text-gray-500" /> 신청 취소
+                                            </h3>
+                                            <button onClick={() => setIsDeleteModalOpen(false)} className="text-gray-400 bg-gray-100 p-2 rounded-full active:bg-gray-200"><XIcon className="w-5 h-5" /></button>
+                                        </div>
+                                        
+                                        <form onSubmit={handleDeleteSubmit} className="space-y-5">
+                                            {formError && (<div className="bg-red-50 p-3 rounded-xl flex items-start text-red-600 text-sm font-medium border border-red-100"><AlertCircle className="w-5 h-5 mr-1.5 shrink-0" /> {formError}</div>)}
+                                            
+                                            <div>
+                                                <label className="block text-sm font-bold text-gray-700 mb-2">취소할 날짜</label>
+                                                <input 
+                                                    type="date" 
+                                                    value={deleteDate} 
+                                                    onChange={(e) => { setDeleteDate(e.target.value); setFormError(''); }} 
+                                                    className="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-base outline-none focus:border-gray-500 focus:bg-white transition-colors cursor-pointer font-bold text-gray-800" 
+                                                />
+                                            </div>
 
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">예약 시 입력한 비밀번호</label>
-                                        <input 
-                                            type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" 
-                                            value={deletePinInput} onChange={(e) => { setDeletePinInput(e.target.value.replace(/[^0-9]/g, '')); setFormError(''); }} 
-                                            className="w-full bg-gray-50 border border-gray-300 px-4 py-3.5 rounded-xl text-lg outline-none focus:border-red-500 tracking-[0.5em] text-center font-bold focus:bg-white transition-colors" 
-                                            placeholder="••••" 
-                                        />
-                                        <p className="text-[11px] text-gray-500 mt-1.5 ml-1">※ 비밀번호와 일치하는 본인 내역만 삭제됩니다.</p>
+                                            <div>
+                                                <label className="block text-sm font-bold text-gray-700 mb-2">예약 시 입력한 비밀번호</label>
+                                                <input 
+                                                    type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" 
+                                                    value={deletePinInput} onChange={(e) => { setDeletePinInput(e.target.value.replace(/[^0-9]/g, '')); setFormError(''); }} 
+                                                    className="w-full bg-gray-50 border border-gray-300 px-4 py-3.5 rounded-xl text-lg outline-none focus:border-red-500 tracking-[0.5em] text-center font-bold focus:bg-white transition-colors" 
+                                                    placeholder="••••" 
+                                                />
+                                                <p className="text-[11px] text-gray-500 mt-1.5 ml-1">※ 비밀번호와 일치하는 본인 내역만 삭제됩니다.</p>
+                                            </div>
+                                            
+                                            <div className="flex gap-2 pt-2">
+                                                <button type="button" onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold text-base active:bg-gray-200">닫기</button>
+                                                <button type="submit" className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold text-base active:bg-red-700 shadow-md">취소 확인</button>
+                                            </div>
+                                        </form>
                                     </div>
-                                    
-                                    <div className="flex gap-2 pt-2">
-                                        <button type="button" onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold text-base active:bg-gray-200">닫기</button>
-                                        <button type="submit" className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold text-base active:bg-red-700 shadow-md">취소 확인</button>
-                                    </div>
-                                </form>
+                                )}
                             </div>
                         </div>
                     )}
