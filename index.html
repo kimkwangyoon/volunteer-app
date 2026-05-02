@@ -40,7 +40,8 @@
     <script type="text/babel" data-type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // 🔥 getDocs 가 추가되었습니다!
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==============================================================
         // ☁️ Firebase 초기화
@@ -141,8 +142,30 @@
                 });
             }, []);
 
-            // === 출력 기능 로직 ===
-            const handleRefresh = () => window.location.reload();
+            // === 🔄 화면 유지형 수동 새로고침 (데이터만 다시 불러오기) ===
+            const handleRefresh = async () => {
+                if (!user) {
+                    showToast('서버에 연결 중입니다.', 'error');
+                    return;
+                }
+                showToast('최신 일정을 확인하는 중입니다...', 'info');
+                try {
+                    const schedulesRef = collection(db, 'artifacts', appId, 'public', 'data', 'schedules');
+                    // 서버에 직접 문서들을 한 번 강제로 요청합니다.
+                    const snapshot = await getDocs(schedulesRef);
+                    const newSchedule = {};
+                    snapshot.forEach(doc => { newSchedule[doc.id] = doc.data(); });
+                    setSchedule(newSchedule);
+                    
+                    // 사용자가 확인하기 좋게 약간의 딜레이 후 성공 메시지 표시
+                    setTimeout(() => {
+                        showToast('최신 일정으로 동기화되었습니다.', 'success');
+                    }, 600);
+                } catch (error) {
+                    console.error("동기화 확인 오류:", error);
+                    showToast('동기화 확인에 실패했습니다.', 'error');
+                }
+            };
 
             const handleExportExcel = () => {
                 setIsExportMenuOpen(false);
@@ -405,7 +428,7 @@
                                             
                                             {!isWeekend && (
                                                 <div className="space-y-0.5">
-                                                    {/* 운전자 항목 (취소 버튼 X 아이콘 삭제됨) */}
+                                                    {/* 운전자 항목 */}
                                                     {daySchedule.driver && (
                                                         <div className="bg-blue-50 border border-blue-100 text-blue-700 text-[10px] sm:text-xs rounded px-1 py-1 flex items-center justify-between">
                                                             <span className="truncate w-full flex items-center">
@@ -420,7 +443,7 @@
                                                         </div>
                                                     )}
                                                     
-                                                    {/* 일반 봉사자 항목 (취소 버튼 X 아이콘 삭제됨) */}
+                                                    {/* 일반 봉사자 항목 */}
                                                     {daySchedule.general.map((person, i) => (
                                                         <div key={i} className="bg-green-50 border border-green-100 text-green-700 text-[10px] sm:text-xs rounded px-1 py-1 flex items-center justify-between">
                                                             <span className="truncate w-full flex items-center">
@@ -467,7 +490,7 @@
                                 <form onSubmit={handleApplySubmit} className="space-y-5">
                                     {formError && (<div className="bg-red-50 p-3 rounded-xl flex items-start text-red-600 text-sm font-medium border border-red-100"><AlertCircle className="w-5 h-5 mr-1.5 shrink-0" /> {formError}</div>)}
                                     
-                                    {/* 날짜 선택 입력칸 (새로 추가됨) */}
+                                    {/* 날짜 선택 입력칸 */}
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-2">신청 날짜</label>
                                         <input 
