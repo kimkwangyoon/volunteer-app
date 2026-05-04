@@ -43,24 +43,25 @@
 
         // ==============================================================
         // ☁️ Firebase 초기화
+        // 👇 파이어베이스 콘솔에서 복사한 선생님의 '진짜 코드'를 아래에 덮어쓰세요!
         // ==============================================================
-        // 선생님의 nanumvolunteer03 프로젝트 설정값입니다.
         const firebaseConfig = {
-            apiKey: "AIzaSyB7dTDbRW8L5vsipfBOphrMWs7Rzkm7ImI",
-            authDomain: "nanumvolunteer03.firebaseapp.com",
-            projectId: "nanumvolunteer03",
-            storageBucket: "nanumvolunteer03.firebasestorage.app",
-            messagingSenderId: "720660924695",
-            appId: "1:720660924695:web:84c6f21570033c00454f52"
-        };
+  apiKey: "AIzaSyB7dTDbRW8L5vsipfBOphrMWs7Rzkm7ImI",
+  authDomain: "nanum-volunteer.firebaseapp.com",
+  databaseURL: "https://nanum-volunteer-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nanum-volunteer",
+  storageBucket: "nanum-volunteer.firebasestorage.app",
+  messagingSenderId: "720660924695",
+  appId: "1:720660924695:web:84c6f21570033c00454f52",
+  measurementId: "G-FQM351TMD6"
+};
+
+        // ==============================================================
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // 💡 [동기화 핵심 해결]
-        // 깃허브, 스마트폰, 데스크톱 어디서 접속하든 무조건 이 'schedules' 라는
-        // 하나의 폴더(컬렉션)만 바라보고 데이터를 쓰고 읽도록 강제 고정했습니다.
         const DB_COLLECTION = 'schedules';
 
         const { useState, useEffect } = React;
@@ -129,7 +130,7 @@
                 return () => unsubscribeAuth();
             }, []);
 
-            // 💡 고정된 컬렉션(DB_COLLECTION)에서 데이터 실시간 동기화
+            // 실시간 동기화
             useEffect(() => {
                 if (!user) return;
                 const schedulesRef = collection(db, DB_COLLECTION);
@@ -749,7 +750,7 @@
         root.render(<App />);
     </script>
 
-    <!-- PWA 기능 설정 (캐시 버전 v3로 업데이트) -->
+    <!-- PWA 기능 설정 (새로운 코드를 즉시 불러오도록 업데이트 강제) -->
     <script>
         const manifest = {
             "name": "나눔과기쁨 봉사 일정표",
@@ -765,7 +766,7 @@
 
         if ('serviceWorker' in navigator) {
             const swCode = `
-                const CACHE_NAME = 'volunteer-app-v3';
+                const CACHE_NAME = 'volunteer-app-v4';
                 self.addEventListener('install', (event) => self.skipWaiting());
                 self.addEventListener('activate', (event) => self.clients.claim());
                 self.addEventListener('fetch', (event) => {
