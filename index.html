@@ -44,23 +44,24 @@
         // ==============================================================
         // ☁️ Firebase 초기화
         // ==============================================================
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config) 
-            : {
-                apiKey: "AIzaSyB7dTDbRW8L5vsipfBOphrMWs7Rzkm7ImI",
-                authDomain: "nanumvolunteer03.firebaseapp.com",
-                projectId: "nanumvolunteer03",
-                storageBucket: "nanumvolunteer03.firebasestorage.app",
-                messagingSenderId: "720660924695",
-                appId: "1:720660924695:web:84c6f21570033c00454f52"
-            };
+        // 선생님의 nanumvolunteer03 프로젝트 설정값입니다.
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7dTDbRW8L5vsipfBOphrMWs7Rzkm7ImI",
+            authDomain: "nanumvolunteer03.firebaseapp.com",
+            projectId: "nanumvolunteer03",
+            storageBucket: "nanumvolunteer03.firebasestorage.app",
+            messagingSenderId: "720660924695",
+            appId: "1:720660924695:web:84c6f21570033c00454f52"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // 💡 [동기화 해결] 어떤 기기나 환경에서 접속하든 동일한 서랍(nanum_schedules)을 쓰도록 경로를 단단히 고정했습니다.
-        const DB_PATH = 'nanum_schedules';
+        // 💡 [동기화 핵심 해결]
+        // 깃허브, 스마트폰, 데스크톱 어디서 접속하든 무조건 이 'schedules' 라는
+        // 하나의 폴더(컬렉션)만 바라보고 데이터를 쓰고 읽도록 강제 고정했습니다.
+        const DB_COLLECTION = 'schedules';
 
         const { useState, useEffect } = React;
 
@@ -120,22 +121,18 @@
 
             useEffect(() => {
                 const initAuth = async () => {
-                    try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            try { await signInWithCustomToken(auth, __initial_auth_token); } 
-                            catch (error) { await signInAnonymously(auth); }
-                        } else { await signInAnonymously(auth); }
-                    } catch (error) { console.error("인증 실패:", error); }
+                    try { await signInAnonymously(auth); } 
+                    catch (error) { console.error("인증 실패:", error); }
                 };
                 initAuth();
                 const unsubscribeAuth = onAuthStateChanged(auth, setUser);
                 return () => unsubscribeAuth();
             }, []);
 
-            // 💡 고정된 경로(DB_PATH)에서 실시간 데이터 불러오기
+            // 💡 고정된 컬렉션(DB_COLLECTION)에서 데이터 실시간 동기화
             useEffect(() => {
                 if (!user) return;
-                const schedulesRef = collection(db, DB_PATH);
+                const schedulesRef = collection(db, DB_COLLECTION);
                 const unsubscribeSnapshot = onSnapshot(schedulesRef, (snapshot) => {
                     const newSchedule = {};
                     snapshot.forEach(doc => { newSchedule[doc.id] = doc.data(); });
@@ -152,12 +149,11 @@
                 });
             }, []);
 
-            // 🔄 수동 동기화 
             const handleRefresh = async () => {
                 if (!user) { showToast('서버에 연결 중입니다.', 'error'); return; }
                 showToast('최신 일정을 확인하는 중입니다...', 'info');
                 try {
-                    const schedulesRef = collection(db, DB_PATH);
+                    const schedulesRef = collection(db, DB_COLLECTION);
                     const snapshot = await getDocs(schedulesRef);
                     const newSchedule = {};
                     snapshot.forEach(doc => { newSchedule[doc.id] = doc.data(); });
@@ -301,7 +297,7 @@
                 try {
                     setIsApplyModalOpen(false);
                     setSelectedDateStr(''); 
-                    const docRef = doc(db, DB_PATH, targetDate);
+                    const docRef = doc(db, DB_COLLECTION, targetDate);
                     await setDoc(docRef, newDayData);
                     showToast(`${targetDate.split('-')[2]}일 신청 완료`, 'success');
                 } catch(err) { showToast('서버 오류로 신청에 실패했습니다.', 'error'); }
@@ -348,7 +344,7 @@
                     setMatchedCandidates([]); 
                     setTargetPinInput('');
                     
-                    const docRef = doc(db, DB_PATH, targetDate);
+                    const docRef = doc(db, DB_COLLECTION, targetDate);
                     if (!newDayData.driver && newDayData.general.length === 0) await deleteDoc(docRef);
                     else await setDoc(docRef, newDayData);
                     showToast('신청 내역이 안전하게 취소되었습니다.', 'success');
@@ -397,7 +393,7 @@
                 try {
                     setIsEditModalOpen(false);
                     setSelectedDateStr('');
-                    const docRef = doc(db, DB_PATH, targetDate);
+                    const docRef = doc(db, DB_COLLECTION, targetDate);
                     await setDoc(docRef, newDayData);
                     showToast('수정이 완료되었습니다.', 'success');
                 } catch(err) { showToast('서버 오류로 수정에 실패했습니다.', 'error'); }
@@ -467,7 +463,6 @@
                         </div>
 
                         <div className="px-2 sm:px-4">
-                            {/* 💡 달력 배경색 수정 완료 */}
                             <div className="grid grid-cols-7 bg-gray-200 border border-gray-200 gap-[1px] rounded-xl overflow-hidden max-w-5xl mx-auto">
                                 {weekDays.map((day, index) => (
                                     <div key={`header-${day}`} className={`bg-gray-50 py-2 text-center font-bold text-sm sm:text-base ${index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : 'text-gray-700'}`}>
@@ -503,7 +498,6 @@
                                             
                                             {isCurrentMonth && daySchedule && !isWeekend && (
                                                 <div className="space-y-0.5">
-                                                    {/* 💡 입력된 이름 글자 크기 대폭 확대 (text-xs sm:text-sm) */}
                                                     {daySchedule.driver && (
                                                         <div className="bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-sm rounded px-1.5 py-1 flex items-center justify-between">
                                                             <span className="truncate w-full flex items-center">
@@ -755,7 +749,7 @@
         root.render(<App />);
     </script>
 
-    <!-- PWA 기능 설정 (캐시 버전 v2로 강제 업데이트) -->
+    <!-- PWA 기능 설정 (캐시 버전 v3로 업데이트) -->
     <script>
         const manifest = {
             "name": "나눔과기쁨 봉사 일정표",
@@ -771,7 +765,7 @@
 
         if ('serviceWorker' in navigator) {
             const swCode = `
-                const CACHE_NAME = 'volunteer-app-v2';
+                const CACHE_NAME = 'volunteer-app-v3';
                 self.addEventListener('install', (event) => self.skipWaiting());
                 self.addEventListener('activate', (event) => self.clients.claim());
                 self.addEventListener('fetch', (event) => {
