@@ -17,6 +17,8 @@
 
     <link id="manifest-placeholder" rel="manifest" href="">
     <link rel="icon" href="IMG_1347.jpeg">
+    <!-- 아이폰 및 스마트폰 바탕화면 전용 아이콘 설정 추가 -->
+    <link rel="apple-touch-icon" href="IMG_1347.jpeg">
     
     <style>
         @media print {
@@ -539,7 +541,7 @@
 
         if ('serviceWorker' in navigator) {
             const swCode = `
-                const CACHE_NAME = 'volunteer-app-v7';
+                const CACHE_NAME = 'volunteer-app-v8';
                 self.addEventListener('install', (event) => self.skipWaiting());
                 self.addEventListener('activate', (event) => self.clients.claim());
                 self.addEventListener('fetch', (event) => {
