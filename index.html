@@ -82,6 +82,17 @@
         // 💡 캘린더(달력)에 더하기 모양이 있는 아이콘 추가
         const CalendarPlusIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>;
 
+        // 💡 [추가] 2024~2030년 주요 법정 공휴일 및 대체 공휴일 데이터 (+ 5월 1일 근로자의 날 추가)
+        const HOLIDAYS = {
+            '2024-01-01': '신정', '2024-02-09': '설날', '2024-02-10': '설날', '2024-02-11': '설날', '2024-02-12': '대체공휴일', '2024-03-01': '삼일절', '2024-04-10': '국회의원선거', '2024-05-01': '근로자의 날', '2024-05-05': '어린이날', '2024-05-06': '대체공휴일', '2024-05-15': '부처님오신날', '2024-06-06': '현충일', '2024-08-15': '광복절', '2024-09-16': '추석', '2024-09-17': '추석', '2024-09-18': '추석', '2024-10-03': '개천절', '2024-10-09': '한글날', '2024-12-25': '성탄절',
+            '2025-01-01': '신정', '2025-01-28': '설날', '2025-01-29': '설날', '2025-01-30': '설날', '2025-03-01': '삼일절', '2025-03-03': '대체공휴일', '2025-05-01': '근로자의 날', '2025-05-05': '어린이날', '2025-05-06': '부처님오신날', '2025-06-06': '현충일', '2025-08-15': '광복절', '2025-10-03': '개천절', '2025-10-05': '추석', '2025-10-06': '추석', '2025-10-07': '추석', '2025-10-08': '대체공휴일', '2025-10-09': '한글날', '2025-12-25': '성탄절',
+            '2026-01-01': '신정', '2026-02-16': '설날', '2026-02-17': '설날', '2026-02-18': '설날', '2026-03-01': '삼일절', '2026-03-02': '대체공휴일', '2026-05-01': '근로자의 날', '2026-05-05': '어린이날', '2026-05-24': '부처님오신날', '2026-05-25': '대체공휴일', '2026-06-03': '지방선거', '2026-06-06': '현충일', '2026-08-15': '광복절', '2026-09-24': '추석', '2026-09-25': '추석', '2026-09-26': '추석', '2026-10-03': '개천절', '2026-10-09': '한글날', '2026-12-25': '성탄절',
+            '2027-01-01': '신정', '2027-02-06': '설날', '2027-02-07': '설날', '2027-02-08': '설날', '2027-02-09': '대체공휴일', '2027-03-01': '삼일절', '2027-03-03': '대통령선거', '2027-05-01': '근로자의 날', '2027-05-05': '어린이날', '2027-05-13': '부처님오신날', '2027-06-06': '현충일', '2027-08-15': '광복절', '2027-08-16': '대체공휴일', '2027-09-14': '추석', '2027-09-15': '추석', '2027-09-16': '추석', '2027-10-03': '개천절', '2027-10-04': '대체공휴일', '2027-10-09': '한글날', '2027-10-11': '대체공휴일', '2027-12-25': '성탄절', '2027-12-27': '대체공휴일',
+            '2028-01-01': '신정', '2028-01-26': '설날', '2028-01-27': '설날', '2028-01-28': '설날', '2028-03-01': '삼일절', '2028-04-12': '국회의원선거', '2028-05-01': '근로자의 날', '2028-05-02': '부처님오신날', '2028-05-05': '어린이날', '2028-06-06': '현충일', '2028-08-15': '광복절', '2028-10-02': '추석', '2028-10-03': '개천절', '2028-10-04': '추석', '2028-10-05': '대체공휴일', '2028-10-09': '한글날', '2028-12-25': '성탄절',
+            '2029-01-01': '신정', '2029-02-12': '설날', '2029-02-13': '설날', '2029-02-14': '설날', '2029-03-01': '삼일절', '2029-05-01': '근로자의 날', '2029-05-05': '어린이날', '2029-05-07': '대체공휴일', '2029-05-20': '부처님오신날', '2029-05-21': '대체공휴일', '2029-06-06': '현충일', '2029-08-15': '광복절', '2029-09-21': '추석', '2029-09-22': '추석', '2029-09-23': '추석', '2029-09-24': '대체공휴일', '2029-10-03': '개천절', '2029-10-09': '한글날', '2029-12-25': '성탄절',
+            '2030-01-01': '신정', '2030-02-02': '설날', '2030-02-03': '설날', '2030-02-04': '설날', '2030-02-05': '대체공휴일', '2030-03-01': '삼일절', '2030-05-01': '근로자의 날', '2030-05-05': '어린이날', '2030-05-06': '대체공휴일', '2030-05-09': '부처님오신날', '2030-06-06': '현충일', '2030-08-15': '광복절', '2030-09-11': '추석', '2030-09-12': '추석', '2030-09-13': '추석', '2030-10-03': '개천절', '2030-10-09': '한글날', '2030-12-25': '성탄절'
+        };
+
         function App() {
             const [user, setUser] = useState(null);
             const [currentDate, setCurrentDate] = useState(() => {
@@ -286,16 +297,21 @@ END:VCALENDAR`;
                 if (!canApply) { showToast('지금은 입력할 수 없습니다.', 'error'); return; }
 
                 const date = dayObj.date;
-                if (date.getDay() === 0 || date.getDay() === 6) { showToast('주말 및 공휴일은 봉사가 없습니다.', 'error'); return; }
+                const dateStr = formatDate(date);
+                const isHoliday = !!HOLIDAYS[dateStr]; // 💡 공휴일인지 확인
                 
-                const clickedDateStr = formatDate(date);
-                if (selectedDateStr === clickedDateStr) {
-                    setTargetDate(clickedDateStr);
+                if (date.getDay() === 0 || date.getDay() === 6 || isHoliday) { 
+                    showToast('주말 및 공휴일은 봉사가 없습니다.', 'error'); 
+                    return; 
+                }
+                
+                if (selectedDateStr === dateStr) {
+                    setTargetDate(dateStr);
                     loadSavedInfo(); 
                     setFormError('');
                     setIsApplyModalOpen(true);
                 } else {
-                    setSelectedDateStr(clickedDateStr);
+                    setSelectedDateStr(dateStr);
                 }
             };
 
@@ -513,18 +529,26 @@ END:VCALENDAR`;
                                     const daySchedule = dayObj.isCurrentMonth ? (schedule[dateStr] || { driver: null, general: [] }) : null;
                                     const isSelected = selectedDateStr === dateStr;
                                     const isToday = dayObj.isCurrentMonth && (formatDate(new Date()) === dateStr);
+                                    const dayOfWeek = date.getDay();
+                                    const holidayName = HOLIDAYS[dateStr]; // 💡 날짜에 해당하는 공휴일 이름 가져오기
+                                    const isDayOff = dayOfWeek === 0 || dayOfWeek === 6 || !!holidayName; // 💡 쉬는 날(주말+공휴일) 여부 확인
 
                                     return (
                                         <div key={`${dateStr}-${index}`} onClick={() => handleDayClick(dayObj)} 
-                                            className={`bg-white min-h-[85px] sm:min-h-[100px] p-1 sm:p-2 relative transition-all 
-                                                ${!dayObj.isCurrentMonth ? '' : (canApply ? 'cursor-pointer active:bg-orange-50' : 'cursor-not-allowed opacity-80')} 
+                                            className={`bg-white min-h-[85px] sm:min-h-[100px] p-1 sm:p-2 relative transition-all flex flex-col
+                                                ${!dayObj.isCurrentMonth ? '' : (canApply && !isDayOff ? 'cursor-pointer active:bg-orange-50' : 'cursor-not-allowed opacity-80 bg-gray-50/30')} 
                                                 ${isSelected ? 'ring-4 ring-inset ring-orange-500 bg-orange-50 z-10' : (isToday ? 'ring-2 ring-inset ring-orange-200' : '')}
                                             `}>
-                                            <div className={`text-base sm:text-lg mb-1 pl-0.5 ${!dayObj.isCurrentMonth ? 'text-gray-300 font-normal' : (date.getDay() === 0 ? 'text-red-500 font-bold' : date.getDay() === 6 ? 'text-blue-500 font-bold' : 'text-gray-800 font-bold')}`}>{date.getDate()}</div>
+                                            {/* 💡 공휴일이면 날짜를 빨간색으로 칠하고, 아래에 공휴일 이름을 띄움 */}
+                                            <div className={`text-base sm:text-lg mb-1 pl-0.5 flex flex-col ${!dayObj.isCurrentMonth ? 'text-gray-300 font-normal' : (dayOfWeek === 0 || holidayName ? 'text-red-500 font-bold' : dayOfWeek === 6 ? 'text-blue-500 font-bold' : 'text-gray-800 font-bold')}`}>
+                                                <span>{date.getDate()}</span>
+                                                {dayObj.isCurrentMonth && holidayName && <span className="text-[9px] sm:text-[10px] text-red-400 font-normal leading-none mt-0.5">{holidayName}</span>}
+                                            </div>
                                             {dayObj.isCurrentMonth && daySchedule && (
-                                                <div className="space-y-0.5">
+                                                <div className="space-y-0.5 mt-auto">
                                                     {daySchedule.driver && <div className="bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-sm rounded px-1.5 py-0.5 truncate flex items-center"><CarIcon className="w-3.5 h-3.5 mr-1 shrink-0 print-hide"/>{daySchedule.driver.name}</div>}
-                                                    {!daySchedule.driver && date.getDay() !== 0 && date.getDay() !== 6 && <div className="border border-dashed border-orange-300 text-orange-500 bg-orange-50/50 text-xs sm:text-sm rounded px-1.5 py-0.5 text-center print-hide">운전자 필요</div>}
+                                                    {/* 💡 쉬는 날(isDayOff)이 아닐 때만 '운전자 필요'를 띄움 */}
+                                                    {!daySchedule.driver && !isDayOff && <div className="border border-dashed border-orange-300 text-orange-500 bg-orange-50/50 text-xs sm:text-sm rounded px-1.5 py-0.5 text-center print-hide">운전자 필요</div>}
                                                     {daySchedule.general.map((p, i) => <div key={i} className="bg-green-50 border border-green-100 text-green-700 text-xs sm:text-sm rounded px-1.5 py-0.5 truncate flex items-center"><UserIcon className="w-3.5 h-3.5 mr-1 shrink-0 print-hide"/>{p.name}</div>)}
                                                 </div>
                                             )}
@@ -778,7 +802,7 @@ END:VCALENDAR`;
 
         if ('serviceWorker' in navigator) {
             const swCode = `
-                const CACHE_NAME = 'volunteer-app-v13';
+                const CACHE_NAME = 'volunteer-app-v16';
                 self.addEventListener('install', (event) => self.skipWaiting());
                 self.addEventListener('activate', (event) => self.clients.claim());
                 self.addEventListener('fetch', (event) => {
