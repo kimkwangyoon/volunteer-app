@@ -58,12 +58,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // 💡 지난달 데이터를 그대로 유지하는 영구 고정 컬렉션
         const DB_COLLECTION = 'nanum_schedules';
 
         const { useState, useEffect } = React;
 
-        // --- SVG 아이콘 ---
+        // --- SVG 아이콘 모음 ---
         const ChevronLeft = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="15 18 9 12 15 6"></polyline></svg>;
         const ChevronRight = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 18 15 12 9 6"></polyline></svg>;
         const CarIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a2 2 0 0 0-1.6-.8H9.3a2 2 0 0 0-1.6.8L5 11l-5.16.86a1 1 0 0 0-.84.99V16h3m10 0a2 2 0 1 1-4 0m4 0a2 2 0 1 0-4 0m-10 0a2 2 0 1 1-4 0m4 0a2 2 0 1 0-4 0"></path></svg>;
@@ -79,6 +78,9 @@
         const PlusCircleIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>;
         const TrashIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
         const BellIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>;
+        const ListIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>;
+        // 💡 캘린더(달력)에 더하기 모양이 있는 아이콘 추가
+        const CalendarPlusIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>;
 
         function App() {
             const [user, setUser] = useState(null);
@@ -89,10 +91,11 @@
             const [schedule, setSchedule] = useState({});
             const [selectedDateStr, setSelectedDateStr] = useState('');
             
-            // 모달 상태
+            // 모달 팝업 상태들
             const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
             const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
             const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+            const [isMyScheduleModalOpen, setIsMyScheduleModalOpen] = useState(false); 
             
             // 공통 입력 상태
             const [applicantName, setApplicantName] = useState('');
@@ -109,6 +112,9 @@
             const [editStep, setEditStep] = useState(1);
             const [selectedEditCandidate, setSelectedEditCandidate] = useState(null);
             
+            // 💡 [추가] 신청 완료 직후 띄울 팝업 상태
+            const [successDialog, setSuccessDialog] = useState({ isOpen: false, dateStr: '', roleStr: '' });
+            
             const [toastMessage, setToastMessage] = useState({ show: false, message: '', type: '' });
             const [authError, setAuthError] = useState(''); 
             const [isInstallable, setIsInstallable] = useState(false);
@@ -117,28 +123,17 @@
             
             const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
 
-            // 💡 [입력 기간 제한 로직 계산]
-            // 오늘 날짜 기준 세팅 (시간은 자정으로 리셋하여 정확한 날짜만 비교)
+            // [입력 기간 제한 로직]
             const today = new Date();
             today.setHours(0, 0, 0, 0); 
-
-            // 현재 보고 있는 달의 1일
             const viewedMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            
-            // 보고 있는 달의 '오픈일' = 그 달의 1일에서 5일을 뺀 날짜
             const openDate = new Date(viewedMonthStart);
             openDate.setDate(viewedMonthStart.getDate() - 5);
-
-            // 현실의 이번 달 1일
             const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
-            // 판단: 보고 있는 달이 '과거이거나 이번 달'이면 무조건 입력 가능
             const isPastOrCurrent = viewedMonthStart.getTime() <= currentMonthStart.getTime();
-            // 판단: 보고 있는 달이 '미래'라면, 오늘 날짜가 오픈일(5일 전)을 지났을 때만 입력 가능
             const canApply = isPastOrCurrent || (today.getTime() >= openDate.getTime());
 
-
-            // 저장된 정보 불러오기/저장하기
             const loadSavedInfo = () => {
                 const savedName = localStorage.getItem('nanum_saved_name');
                 const savedPin = localStorage.getItem('nanum_saved_pin');
@@ -154,7 +149,6 @@
                 localStorage.setItem('nanum_saved_pin', pin);
             };
 
-            // 알림 권한 요청 (스마트폰, PC 알림 띄우기)
             const enableNotification = () => {
                 if (!("Notification" in window)) {
                     showToast("이 기기는 알림 기능을 지원하지 않습니다.", "error");
@@ -163,7 +157,6 @@
                 Notification.requestPermission().then(permission => {
                     if (permission === "granted") {
                         showToast("알림이 설정되었습니다! 오픈 시 알려드릴게요.", "success");
-                        // 테스트용 즉시 알림 발송
                         new Notification("나눔과기쁨 봉사일정", { 
                             body: "알림 설정 완료! 봉사 신청 기간이 되면 알려드립니다.",
                             icon: "IMG_1347.jpeg"
@@ -177,7 +170,10 @@
             useEffect(() => {
                 const initAuth = async () => {
                     try { await signInAnonymously(auth); } 
-                    catch (error) { console.error("인증 실패:", error); }
+                    catch (error) { 
+                        console.error("인증 실패:", error);
+                        setAuthError('서버 연결에 실패했습니다: ' + error.message);
+                    }
                 };
                 initAuth();
                 const unsubscribeAuth = onAuthStateChanged(auth, setUser);
@@ -202,6 +198,49 @@
                     setIsInstallable(true);
                 });
             }, []);
+
+            // 💡 [스마트폰 달력 연동] 봉사 일정을 스마트폰 기본 캘린더에 다운로드하는 기능
+            const handleDownloadICS = (dateStr, roleStr) => {
+                // 날짜 텍스트를 분해해서 만듦 (예: "2024-05-15")
+                const yyyy = dateStr.split('-')[0];
+                const mm = dateStr.split('-')[1];
+                const dd = dateStr.split('-')[2];
+                
+                // 시작일 (YYYYMMDD 형식)
+                const startStr = `${yyyy}${mm}${dd}`;
+                
+                // 종료일 (다음날로 지정해야 종일 일정으로 인식됨)
+                const endDate = new Date(Number(yyyy), Number(mm) - 1, Number(dd) + 1);
+                const endY = endDate.getFullYear();
+                const endM = String(endDate.getMonth() + 1).padStart(2, '0');
+                const endD = String(endDate.getDate()).padStart(2, '0');
+                const endStr = `${endY}${endM}${endD}`;
+
+                // 캘린더 파일(.ics) 내용 생성
+                const icsContent = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Nanum//Volunteer//KO
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:${startStr}
+DTEND;VALUE=DATE:${endStr}
+SUMMARY:[나눔과기쁨] 봉사 일정 (${roleStr})
+DESCRIPTION:나눔과기쁨 ${roleStr} 봉사 일정입니다. 잊지 말고 참석해 주세요!
+END:VEVENT
+END:VCALENDAR`;
+
+                // 파일을 생성해서 브라우저로 다운로드 (스마트폰이 자동으로 캘린더 추가 창을 띄움)
+                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `봉사일정_${startStr}.ics`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast('캘린더 파일이 다운로드되었습니다. 열어서 캘린더에 추가하세요!', 'info');
+            };
 
             const handleRefresh = async () => {
                 if (!user) { showToast('서버에 연결 중입니다.', 'error'); return; }
@@ -242,24 +281,12 @@
                 return days;
             };
 
-            const isWeekendString = (dateStr) => {
-                const [y, m, d] = dateStr.split('-');
-                const date = new Date(y, m - 1, d);
-                return date.getDay() === 0 || date.getDay() === 6;
-            };
-
             const handleDayClick = (dayObj) => {
                 if (!dayObj.isCurrentMonth) { setSelectedDateStr(''); return; }
-                
-                // 💡 오픈 전인 달은 달력에서 아예 클릭을 막음
-                if (!canApply) {
-                    showToast('지금은 입력할 수 없습니다.', 'error');
-                    return;
-                }
+                if (!canApply) { showToast('지금은 입력할 수 없습니다.', 'error'); return; }
 
                 const date = dayObj.date;
-                const dayOfWeek = date.getDay();
-                if (dayOfWeek === 0 || dayOfWeek === 6) { showToast('주말 및 공휴일은 봉사가 없습니다.', 'error'); return; }
+                if (date.getDay() === 0 || date.getDay() === 6) { showToast('주말 및 공휴일은 봉사가 없습니다.', 'error'); return; }
                 
                 const clickedDateStr = formatDate(date);
                 if (selectedDateStr === clickedDateStr) {
@@ -297,6 +324,13 @@
                     const docRef = doc(db, DB_COLLECTION, targetDate);
                     await setDoc(docRef, newDayData);
                     showToast(`${targetDate.split('-')[2]}일 신청 완료`, 'success');
+                    
+                    // 💡 [추가] 신청 성공 시 달력 저장 팝업 즉시 띄우기
+                    setSuccessDialog({ 
+                        isOpen: true, 
+                        dateStr: targetDate, 
+                        roleStr: applicantRole === 'driver' ? '운전' : '일반' 
+                    });
                 } catch(err) { showToast('서버 오류로 신청에 실패했습니다.', 'error'); }
             };
 
@@ -376,7 +410,7 @@
                 } catch(err) { showToast('서버 오류로 수정에 실패했습니다.', 'error'); }
             };
 
-            const handleExportExcel = () => { /* 엑셀 출력 코드 유지 */
+            const handleExportExcel = () => {
                 setIsExportMenuOpen(false);
                 let csvContent = "\uFEFF날짜,요일,운전봉사(1명),일반봉사(1),일반봉사(2)\n";
                 getCalendarDays().forEach(dayObj => {
@@ -399,7 +433,7 @@
                 document.body.appendChild(link); link.click(); document.body.removeChild(link);
             };
 
-            const handleExportPDF = () => { /* PDF 출력 코드 유지 */
+            const handleExportPDF = () => {
                 setIsExportMenuOpen(false);
                 const element = document.getElementById('calendar-export-area');
                 showToast('PDF 변환 중입니다. 잠시만 기다려주세요...', 'info');
@@ -411,8 +445,10 @@
                 window.html2pdf().set(opt).from(element).save().then(() => showToast('PDF 다운로드가 완료되었습니다.', 'success'));
             };
 
+            const handlePrint = () => { setIsExportMenuOpen(false); window.print(); };
+
             return (
-                <div className="min-h-[100dvh] bg-gray-50 flex flex-col font-sans pb-24">
+                <div className="min-h-[100dvh] bg-gray-50 flex flex-col font-sans pb-28">
                     {/* 상단 헤더 */}
                     <header className="bg-orange-50 px-4 py-5 border-b border-orange-100 flex flex-col gap-4 print-hide">
                         <div className="flex justify-between items-start">
@@ -434,7 +470,7 @@
                         </div>
                     )}
 
-                    {/* 메인 달력 영역 */}
+                    {/* 메인 달력 구역 */}
                     <div id="calendar-export-area" className="flex-1 bg-gray-50 pt-4 pb-4">
                         <div className="flex items-center bg-white rounded-full p-1 shadow-sm border border-gray-200 justify-between max-w-sm mx-auto w-full mb-2 print-hide">
                             <button onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)); setSelectedDateStr(''); }} className="p-2 text-orange-600 active:bg-orange-100 rounded-full"><ChevronLeft className="w-5 h-5" /></button>
@@ -442,7 +478,7 @@
                             <button onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)); setSelectedDateStr(''); }} className="p-2 text-orange-600 active:bg-orange-100 rounded-full"><ChevronRight className="w-5 h-5" /></button>
                         </div>
                         
-                        {/* 💡 입력 가능 상태 안내 배너 */}
+                        {/* 오픈 알림 배너 */}
                         <div className="max-w-5xl mx-4 sm:mx-auto mb-4 print-hide">
                             <div className={`p-2.5 sm:p-3 rounded-xl font-bold flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm shadow-sm transition-colors ${canApply ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
                                 <div className="text-center sm:text-left mb-2 sm:mb-0">
@@ -499,12 +535,107 @@
                         </div>
                     </div>
 
-                    {/* 하단 고정 3버튼 */}
-                    <div className="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-gray-200 p-3 flex gap-2 sm:gap-4 z-30 print-hide shadow-xl">
-                        <button onClick={() => { if(!canApply) { showToast('지금은 입력할 수 없습니다.', 'error'); return; } setTargetDate(selectedDateStr || ''); loadSavedInfo(); setApplicantRole('general'); setFormError(''); setIsApplyModalOpen(true); }} className={`flex-1 text-white font-bold py-4 rounded-2xl shadow-md flex flex-col items-center justify-center transition-all ${canApply ? 'bg-orange-600 active:bg-orange-700 active:scale-95' : 'bg-gray-400 opacity-60 cursor-not-allowed'}`}><PlusCircleIcon className="w-6 h-6 mb-1"/> 신청</button>
-                        <button onClick={() => { if(!canApply) { showToast('지금은 수정할 수 없습니다.', 'error'); return; } setTargetDate(selectedDateStr || ''); loadSavedInfo(); setFormError(''); setEditStep(1); setIsEditModalOpen(true); }} className={`flex-1 text-white font-bold py-4 rounded-2xl shadow-md flex flex-col items-center justify-center transition-all ${canApply ? 'bg-blue-600 active:bg-blue-700 active:scale-95' : 'bg-gray-400 opacity-60 cursor-not-allowed'}`}><PencilIcon className="w-6 h-6 mb-1"/> 수정</button>
-                        <button onClick={() => { if(!canApply) { showToast('지금은 취소할 수 없습니다.', 'error'); return; } setTargetDate(selectedDateStr || ''); loadSavedInfo(); setFormError(''); setMatchedCandidates([]); setIsDeleteModalOpen(true); }} className={`flex-1 text-gray-800 font-bold py-4 rounded-2xl shadow-md flex flex-col items-center justify-center transition-all ${canApply ? 'bg-gray-200 active:bg-gray-300 active:scale-95' : 'bg-gray-200 opacity-60 cursor-not-allowed'}`}><TrashIcon className="w-6 h-6 mb-1 text-gray-600"/> 취소</button>
+                    {/* 하단 고정 4버튼 */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-gray-200 p-2.5 sm:p-4 pb-safe flex gap-1.5 sm:gap-3 z-30 print-hide shadow-xl">
+                        <button onClick={() => setIsMyScheduleModalOpen(true)} className="flex-1 bg-emerald-600 text-white font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-md active:bg-emerald-700 flex flex-col items-center justify-center transition-all active:scale-95">
+                            <ListIcon className="w-5 h-5 sm:w-6 sm:h-6 mb-1"/> 
+                            <span className="text-[11px] sm:text-sm">내 일정</span>
+                        </button>
+                        
+                        <button onClick={() => { if(!canApply) { showToast('지금은 입력할 수 없습니다.', 'error'); return; } setTargetDate(selectedDateStr || ''); loadSavedInfo(); setApplicantRole('general'); setFormError(''); setIsApplyModalOpen(true); }} className={`flex-1 text-white font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-md flex flex-col items-center justify-center transition-all ${canApply ? 'bg-orange-600 active:bg-orange-700 active:scale-95' : 'bg-gray-400 opacity-60 cursor-not-allowed'}`}>
+                            <PlusCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 mb-1"/> 
+                            <span className="text-[11px] sm:text-sm">신청</span>
+                        </button>
+                        
+                        <button onClick={() => { if(!canApply) { showToast('지금은 수정할 수 없습니다.', 'error'); return; } setTargetDate(selectedDateStr || ''); loadSavedInfo(); setFormError(''); setEditStep(1); setIsEditModalOpen(true); }} className={`flex-1 text-white font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-md flex flex-col items-center justify-center transition-all ${canApply ? 'bg-blue-600 active:bg-blue-700 active:scale-95' : 'bg-gray-400 opacity-60 cursor-not-allowed'}`}>
+                            <PencilIcon className="w-5 h-5 sm:w-6 sm:h-6 mb-1"/> 
+                            <span className="text-[11px] sm:text-sm">수정</span>
+                        </button>
+                        
+                        <button onClick={() => { if(!canApply) { showToast('지금은 취소할 수 없습니다.', 'error'); return; } setTargetDate(selectedDateStr || ''); loadSavedInfo(); setFormError(''); setMatchedCandidates([]); setIsDeleteModalOpen(true); }} className={`flex-1 text-gray-800 font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-md flex flex-col items-center justify-center transition-all ${canApply ? 'bg-gray-200 active:bg-gray-300 active:scale-95' : 'bg-gray-200 opacity-60 cursor-not-allowed'}`}>
+                            <TrashIcon className="w-5 h-5 sm:w-6 sm:h-6 mb-1 text-gray-600"/> 
+                            <span className="text-[11px] sm:text-sm">취소</span>
+                        </button>
                     </div>
+
+                    {/* 💡 [내 봉사 일정] 확인 모달창 (캘린더 추가 버튼 포함) */}
+                    {isMyScheduleModalOpen && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex flex-col justify-end print-hide">
+                            <div className="bg-white rounded-t-3xl w-full p-6 pb-10 sm:max-w-md sm:mx-auto sm:rounded-3xl sm:mb-10 shadow-2xl animate-[translate-y-full_0.3s_ease-out]">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                                        <ListIcon className="w-6 h-6 mr-2 text-emerald-600" /> 내 봉사 일정
+                                    </h3>
+                                    <button onClick={() => setIsMyScheduleModalOpen(false)} className="text-gray-400 bg-gray-100 p-2 rounded-full active:bg-gray-200"><XIcon className="w-5 h-5" /></button>
+                                </div>
+                                
+                                <div className="max-h-[50vh] overflow-y-auto pr-2 space-y-3">
+                                    {(() => {
+                                        const savedPin = localStorage.getItem('nanum_saved_pin');
+                                        const savedName = localStorage.getItem('nanum_saved_name');
+                                        
+                                        if (!savedPin || !savedName) {
+                                            return (
+                                                <div className="text-center py-8 bg-gray-50 rounded-2xl border border-gray-200">
+                                                    <p className="text-gray-500 text-sm font-medium">기억된 내 정보가 없습니다.<br/>먼저 봉사 일정을 한 번 신청해 주세요!</p>
+                                                </div>
+                                            );
+                                        }
+                                        
+                                        const mySchedules = [];
+                                        Object.keys(schedule).forEach(dateStr => {
+                                            const dayData = schedule[dateStr];
+                                            if (dayData.driver && dayData.driver.pin === savedPin) {
+                                                mySchedules.push({ date: dateStr, role: 'driver', name: dayData.driver.name });
+                                            }
+                                            dayData.general.forEach((p) => {
+                                                if (p.pin === savedPin) {
+                                                    mySchedules.push({ date: dateStr, role: 'general', name: p.name });
+                                                }
+                                            });
+                                        });
+                                        
+                                        mySchedules.sort((a, b) => new Date(a.date) - new Date(b.date));
+                                        
+                                        if (mySchedules.length === 0) {
+                                            return (
+                                                <div className="text-center py-8 bg-gray-50 rounded-2xl border border-gray-200">
+                                                    <p className="text-gray-500 text-sm font-medium">현재 예약된 봉사 일정이 없습니다.</p>
+                                                </div>
+                                            );
+                                        }
+                                        
+                                        return mySchedules.map((item, idx) => {
+                                            const d = new Date(item.date);
+                                            const dayStr = weekDays[d.getDay()];
+                                            return (
+                                                <div key={idx} className="p-4 bg-white border border-gray-200 rounded-2xl shadow-sm flex items-center justify-between">
+                                                    <div>
+                                                        <p className="font-bold text-gray-800 text-lg">
+                                                            {d.getMonth() + 1}월 {d.getDate()}일 <span className="text-sm font-normal text-gray-500">({dayStr})</span>
+                                                        </p>
+                                                        <p className="text-sm text-gray-600 mt-0.5">{item.name}님</p>
+                                                    </div>
+                                                    <div className="flex flex-col items-end gap-2">
+                                                        <div className={`px-3 py-1.5 rounded-lg font-bold text-xs ${item.role === 'driver' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>
+                                                            {item.role === 'driver' ? '🚗 운전' : '👤 일반'}
+                                                        </div>
+                                                        {/* 💡 캘린더 저장 버튼 추가! */}
+                                                        <button 
+                                                            onClick={() => handleDownloadICS(item.date, item.role === 'driver' ? '운전' : '일반')}
+                                                            className="bg-gray-100 text-gray-600 hover:bg-orange-50 hover:text-orange-600 px-2.5 py-1.5 rounded-lg text-[10px] font-bold flex items-center transition-colors border border-gray-200"
+                                                        >
+                                                            <CalendarPlusIcon className="w-3 h-3 mr-1" /> 캘린더 저장
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        });
+                                    })()}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* 모달 공통 - 신청 */}
                     {isApplyModalOpen && (
@@ -593,6 +724,37 @@
                             <div className={`text-white px-6 py-3 rounded-full shadow-lg text-sm font-bold whitespace-nowrap ${toastMessage.type === 'error' ? 'bg-red-600' : 'bg-gray-800'}`}>{toastMessage.message}</div>
                         </div>
                     )}
+
+                    {/* 💡 [추가] 신청 완료 직후 뜨는 캘린더 저장 안내 팝업 */}
+                    {successDialog.isOpen && (
+                        <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 print-hide">
+                            <div className="bg-white rounded-3xl w-full max-w-sm p-6 text-center shadow-2xl">
+                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500">
+                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">신청이 완료되었습니다!</h3>
+                                <p className="text-sm text-gray-600 mb-6">스마트폰 달력에 일정을 추가해두시면<br/>잊지 않고 참석하실 수 있어요.</p>
+                                
+                                <div className="space-y-2.5">
+                                    <button 
+                                        onClick={() => {
+                                            handleDownloadICS(successDialog.dateStr, successDialog.roleStr);
+                                            setSuccessDialog({ isOpen: false, dateStr: '', roleStr: '' });
+                                        }}
+                                        className="w-full py-4 bg-orange-600 text-white rounded-2xl font-bold text-base shadow-md active:bg-orange-700 flex items-center justify-center transition-transform active:scale-95"
+                                    >
+                                        <CalendarPlusIcon className="w-5 h-5 mr-2" /> 스마트폰 달력에 저장하기
+                                    </button>
+                                    <button 
+                                        onClick={() => setSuccessDialog({ isOpen: false, dateStr: '', roleStr: '' })}
+                                        className="w-full py-3.5 bg-gray-100 text-gray-700 rounded-2xl font-bold text-sm active:bg-gray-200 transition-colors"
+                                    >
+                                        괜찮습니다 (닫기)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -616,7 +778,7 @@
 
         if ('serviceWorker' in navigator) {
             const swCode = `
-                const CACHE_NAME = 'volunteer-app-v9';
+                const CACHE_NAME = 'volunteer-app-v13';
                 self.addEventListener('install', (event) => self.skipWaiting());
                 self.addEventListener('activate', (event) => self.clients.claim());
                 self.addEventListener('fetch', (event) => {
