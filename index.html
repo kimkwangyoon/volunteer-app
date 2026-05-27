@@ -26,7 +26,6 @@
         }
         input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; transition: 0.2s; }
         input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
-        /* 검색창 목록 스크롤바 예쁘게 숨기기 */
         .hide-scroll::-webkit-scrollbar { width: 4px; }
         .hide-scroll::-webkit-scrollbar-thumb { background-color: #e5e7eb; border-radius: 10px; }
     </style>
@@ -64,14 +63,10 @@
         const XIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
         const AlertCircle = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
         const RefreshIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>;
-        const DownloadIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>;
-        const TableIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="9" x2="9" y2="21"></line><line x1="15" y1="9" x2="15" y2="21"></line></svg>;
-        const FileTextIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>;
         const PrinterIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>;
         const PencilIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>;
         const PlusCircleIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>;
         const TrashIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
-        const BellIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>;
         const ListIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>;
         const CalendarPlusIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>;
         const SettingsIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>;
@@ -86,7 +81,6 @@
             '2030-01-01': '신정', '2030-02-02': '설날', '2030-02-03': '설날', '2030-02-04': '설날', '2030-02-05': '대체공휴일', '2030-03-01': '삼일절', '2030-05-01': '근로자의 날', '2030-05-05': '어린이날', '2030-05-06': '대체공휴일', '2030-05-09': '부처님오신날', '2030-06-06': '현충일', '2030-08-15': '광복절', '2030-09-11': '추석', '2030-09-12': '추석', '2030-09-13': '추석', '2030-10-03': '개천절', '2030-10-09': '한글날', '2030-12-25': '성탄절'
         };
 
-        // 💡 [추가] 한글에서 '초성'만 똑똑하게 뽑아내는 함수입니다.
         const getChosung = (str) => {
             const cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
             let result = "";
@@ -118,13 +112,15 @@
             const [members, setMembers] = useState([]);
             const [newMemberName, setNewMemberName] = useState('');
             const [newMemberPin, setNewMemberPin] = useState('');
+            // 💡 [추가] 관리자가 특정 회원의 정보를 수정할 때 사용하는 상태
+            const [editingMember, setEditingMember] = useState(null);
             
+            const [inputMode, setInputMode] = useState('select'); 
             const [applicantName, setApplicantName] = useState('');
             const [applicantPin, setApplicantPin] = useState('');
             const [applicantRole, setApplicantRole] = useState('general');
             const [formError, setFormError] = useState('');
             
-            // 💡 [추가] 이름 검색창 목록이 열려있는지 닫혀있는지 기억하는 상태
             const [showNameList, setShowNameList] = useState(false);
             
             const [targetDate, setTargetDate] = useState(''); 
@@ -153,11 +149,12 @@
             const loadSavedInfo = () => {
                 const savedName = localStorage.getItem('nanum_saved_name');
                 const savedPin = localStorage.getItem('nanum_saved_pin');
-                if (savedName) setApplicantName(savedName);
-                if (savedPin) {
-                    setApplicantPin(savedPin);
-                    setTargetPinInput(savedPin);
-                }
+                if (savedName) {
+                    setApplicantName(savedName);
+                    if (members.some(m => m.name === savedName)) setInputMode('select');
+                    else setInputMode('direct');
+                } else { setInputMode('select'); }
+                if (savedPin) { setApplicantPin(savedPin); setTargetPinInput(savedPin); }
             };
 
             const saveInfoToLocal = (name, pin) => {
@@ -168,9 +165,7 @@
             useEffect(() => {
                 const initAuth = async () => {
                     try { await signInAnonymously(auth); } 
-                    catch (error) { 
-                        setAuthError('서버 연결에 실패했습니다: ' + error.message);
-                    }
+                    catch (error) { setAuthError('서버 연결에 실패했습니다: ' + error.message); }
                 };
                 initAuth();
                 const unsubscribeAuth = onAuthStateChanged(auth, setUser);
@@ -200,9 +195,7 @@
                 e.preventDefault();
                 if (adminPwInput === 'joy7709') {
                     setIsAdmin(true); setAdminPwInput(''); setFormError('');
-                } else {
-                    setFormError('비밀번호가 일치하지 않습니다.');
-                }
+                } else { setFormError('비밀번호가 일치하지 않습니다.'); }
             };
 
             const handleAddMember = async (e) => {
@@ -218,10 +211,36 @@
 
             const handleDeleteMember = async (id) => {
                 if(window.confirm('정말 삭제하시겠습니까?')) {
-                    try {
-                        await deleteDoc(doc(db, 'nanum_members', id)); showToast('회원이 삭제되었습니다.', 'success');
-                    } catch(err) { showToast('오류가 발생했습니다.', 'error'); }
+                    try { await deleteDoc(doc(db, 'nanum_members', id)); showToast('회원이 삭제되었습니다.', 'success'); } 
+                    catch(err) { showToast('오류가 발생했습니다.', 'error'); }
                 }
+            };
+
+            // 💡 [추가] 회원 정보(이름, 비밀번호) 수정 저장 함수
+            const handleUpdateMember = async (id) => {
+                if (!editingMember.name.trim() || editingMember.pin.length !== 4) {
+                    showToast('이름과 4자리 비밀번호를 정확히 입력하세요.', 'error'); return;
+                }
+                try {
+                    await setDoc(doc(db, 'nanum_members', id), { name: editingMember.name.trim(), pin: editingMember.pin });
+                    setEditingMember(null);
+                    showToast('회원 정보가 수정되었습니다.', 'success');
+                } catch(err) { showToast('오류가 발생했습니다.', 'error'); }
+            };
+
+            // 💡 [추가] 관리자용 프리패스 권한 (해당 날짜의 모든 일정을 비밀번호 없이 조회)
+            const handleAdminOverrideSearch = () => {
+                if (!targetDate) { setFormError('날짜를 선택해주세요.'); return; }
+                const dayData = schedule[targetDate];
+                if (!dayData || (!dayData.driver && dayData.general.length === 0)) { setFormError('해당 날짜에 등록된 일정이 없습니다.'); return; }
+                
+                const matches = [];
+                if (dayData.driver) matches.push({ role: 'driver', name: dayData.driver.name, originalRole: 'driver', originalIndex: null, pin: dayData.driver.pin });
+                dayData.general.forEach((person, idx) => { matches.push({ role: 'general', index: idx, name: person.name, originalRole: 'general', originalIndex: idx, pin: person.pin }); });
+                
+                setMatchedCandidates(matches);
+                setFormError('');
+                if (isEditModalOpen) setEditStep(2);
             };
 
             const handleDownloadICS = (dateStr, roleStr) => {
@@ -277,10 +296,7 @@
                 if (!canApply) { showToast('지금은 입력할 수 없습니다.', 'error'); return; }
 
                 const date = dayObj.date; const dateStr = formatDate(date); const isHoliday = !!HOLIDAYS[dateStr]; 
-                
-                if (date.getDay() === 0 || date.getDay() === 6 || isHoliday) { 
-                    showToast('주말 및 공휴일은 봉사가 없습니다.', 'error'); return; 
-                }
+                if (date.getDay() === 0 || date.getDay() === 6 || isHoliday) { showToast('주말 및 공휴일은 봉사가 없습니다.', 'error'); return; }
                 
                 if (selectedDateStr === dateStr) {
                     setTargetDate(dateStr); loadSavedInfo(); setFormError(''); setShowNameList(false); setIsApplyModalOpen(true);
@@ -316,8 +332,8 @@
             const searchCandidatesByPin = (dateStr, pin) => {
                 const dayData = schedule[dateStr]; if (!dayData) return [];
                 const matches = [];
-                if (dayData.driver && dayData.driver.pin === pin) matches.push({ role: 'driver', name: dayData.driver.name, originalRole: 'driver', originalIndex: null });
-                dayData.general.forEach((person, idx) => { if (person.pin === pin) matches.push({ role: 'general', index: idx, name: person.name, originalRole: 'general', originalIndex: idx }); });
+                if (dayData.driver && dayData.driver.pin === pin) matches.push({ role: 'driver', name: dayData.driver.name, originalRole: 'driver', originalIndex: null, pin: dayData.driver.pin });
+                dayData.general.forEach((person, idx) => { if (person.pin === pin) matches.push({ role: 'general', index: idx, name: person.name, originalRole: 'general', originalIndex: idx, pin: person.pin }); });
                 return matches;
             };
 
@@ -355,36 +371,37 @@
 
             const openEditForm = (candidate) => {
                 setSelectedEditCandidate(candidate); setApplicantName(candidate.name); setApplicantRole(candidate.originalRole);
+                // 💡 [수정] 수정창을 열 때 기존 회원의 비밀번호도 채워넣습니다.
+                setApplicantPin(candidate.pin || targetPinInput);
                 setEditStep(3); setFormError(''); setMatchedCandidates([]); setShowNameList(false);
             };
 
             const handleEditSubmit = async (e) => {
                 e.preventDefault();
+                if (!applicantPin || applicantPin.length !== 4) { setFormError('비밀번호 4자리를 입력해주세요.'); return; }
                 const dayData = schedule[targetDate];
                 let newDayData = { ...dayData, general: [...dayData.general] };
                 if (selectedEditCandidate.originalRole === 'driver') newDayData.driver = null; else newDayData.general.splice(selectedEditCandidate.originalIndex, 1);
                 
                 if (applicantRole === 'driver') {
                     if (newDayData.driver) { setFormError('이미 다른 운전 봉사자가 있습니다.'); return; }
-                    newDayData.driver = { name: applicantName.trim(), pin: targetPinInput };
+                    newDayData.driver = { name: applicantName.trim(), pin: applicantPin };
                 } else {
                     if (newDayData.general.length >= 2) { setFormError('일반 봉사 자리가 없습니다.'); return; }
-                    newDayData.general.push({ name: applicantName.trim(), pin: targetPinInput });
+                    newDayData.general.push({ name: applicantName.trim(), pin: applicantPin });
                 }
 
                 try {
-                    setIsEditModalOpen(false); setSelectedDateStr(''); saveInfoToLocal(applicantName.trim(), targetPinInput); 
+                    setIsEditModalOpen(false); setSelectedDateStr(''); saveInfoToLocal(applicantName.trim(), applicantPin); 
                     const docRef = doc(db, DB_COLLECTION, targetDate); await setDoc(docRef, newDayData);
                     showToast('수정이 완료되었습니다.', 'success');
                 } catch(err) { showToast('서버 오류로 수정에 실패했습니다.', 'error'); }
             };
 
-            // 💡 [추가] 내가 방금 입력한 이름(또는 초성)이 포함된 회원만 걸러내는 필터 기능입니다!
             const filteredMembers = members.filter(m => {
                 if (!applicantName) return true;
                 const searchLower = applicantName.toLowerCase();
                 const nameLower = m.name.toLowerCase();
-                // 이름 그대로 포함되어 있거나, 초성으로 변환했을 때 포함되어 있으면 보여줍니다!
                 return nameLower.includes(searchLower) || getChosung(nameLower).includes(getChosung(searchLower));
             });
 
@@ -399,8 +416,10 @@
                                 나눔과기쁨 봉사 일정
                             </h1>
                             <div className="flex gap-2 sm:gap-3">
-                                <button onClick={() => { setIsSettingsModalOpen(true); setIsAdmin(false); setAdminPwInput(''); setFormError(''); }} className="bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-full shadow-sm text-sm font-bold active:bg-gray-100 flex items-center transition-colors">
-                                    <SettingsIcon className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">관리자</span>
+                                {/* 💡 관리자 로그인 시 톱니바퀴 대신 👑 왕관 아이콘 표시 */}
+                                <button onClick={() => { setIsSettingsModalOpen(true); if(!isAdmin) { setAdminPwInput(''); setFormError(''); } }} className={`bg-white border text-gray-700 px-3 py-2 rounded-full shadow-sm text-sm font-bold active:bg-gray-100 flex items-center transition-colors ${isAdmin ? 'border-orange-500 text-orange-700 bg-orange-50' : 'border-gray-200'}`}>
+                                    {isAdmin ? <span className="text-base sm:mr-1">👑</span> : <SettingsIcon className="w-4 h-4 sm:mr-1.5" />}
+                                    <span className="hidden sm:inline">관리자</span>
                                 </button>
                                 <button onClick={handleRefresh} className="bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-full shadow-sm text-sm font-bold active:bg-gray-100 flex items-center transition-colors"><RefreshIcon className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">동기화</span></button>
                                 <button onClick={() => window.print()} className="bg-orange-600 text-white px-3 py-2 rounded-full shadow-sm text-sm font-bold active:bg-orange-700 flex items-center transition-colors"><PrinterIcon className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">출력</span></button>
@@ -457,7 +476,7 @@
                         <button onClick={() => { if(!canApply) { showToast('지금은 취소할 수 없습니다.', 'error'); return; } setTargetDate(selectedDateStr || ''); loadSavedInfo(); setFormError(''); setMatchedCandidates([]); setIsDeleteModalOpen(true); }} className={`flex-1 text-gray-800 font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-md flex flex-col items-center justify-center transition-all ${canApply ? 'bg-gray-200 active:bg-gray-300 active:scale-95' : 'bg-gray-200 opacity-60 cursor-not-allowed'}`}><TrashIcon className="w-5 h-5 sm:w-6 sm:h-6 mb-1 text-gray-600"/> <span className="text-[11px] sm:text-sm">취소</span></button>
                     </div>
 
-                    {/* 관리자 설정 모달창 */}
+                    {/* 관리자 설정 모달창 (명단 관리) */}
                     {isSettingsModalOpen && (
                         <div className="fixed inset-0 bg-black/50 z-50 flex flex-col justify-end print-hide">
                             <div className="bg-white rounded-t-3xl w-full p-6 pb-10 sm:max-w-md sm:mx-auto sm:rounded-3xl sm:mb-10 shadow-2xl animate-[translate-y-full_0.3s_ease-out] max-h-[90vh] flex flex-col">
@@ -469,7 +488,7 @@
                                         <button type="submit" className="w-full bg-gray-800 text-white text-lg font-bold py-4 rounded-2xl active:bg-gray-900 shadow-md">접속하기</button>
                                     </form>
                                 ) : (
-                                    <div className="flex-1 overflow-y-auto pr-1 space-y-6">
+                                    <div className="flex-1 overflow-y-auto pr-1 space-y-6 hide-scroll">
                                         <form onSubmit={handleAddMember} className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-3 shadow-inner">
                                             <h4 className="font-bold text-gray-800 mb-2">새 봉사자 등록</h4>
                                             {formError && <div className="text-red-600 text-xs font-bold">{formError}</div>}
@@ -482,7 +501,29 @@
                                         <div>
                                             <h4 className="font-bold text-gray-800 mb-3 flex justify-between items-end">등록된 회원 목록 <span className="text-gray-500 font-normal text-sm bg-gray-100 px-2 py-0.5 rounded-full">총 {members.length}명</span></h4>
                                             <div className="space-y-2">
-                                                {members.length === 0 ? (<div className="text-center py-6 text-gray-400 text-sm border border-dashed border-gray-200 rounded-xl">등록된 회원이 없습니다.</div>) : (members.map(m => (<div key={m.id} className="flex justify-between items-center bg-white border border-gray-200 p-3 rounded-xl shadow-sm"><div className="flex items-center gap-3"><span className="font-bold text-gray-800 text-lg">{m.name}</span><span className="text-xs text-blue-600 font-mono bg-blue-50 border border-blue-100 px-2 py-1 rounded-md">PW: {m.pin}</span></div><button onClick={() => handleDeleteMember(m.id)} className="text-red-500 p-2 hover:bg-red-50 rounded-lg transition-colors"><TrashIcon className="w-5 h-5" /></button></div>)))}
+                                                {members.length === 0 ? (<div className="text-center py-6 text-gray-400 text-sm border border-dashed border-gray-200 rounded-xl">등록된 회원이 없습니다.</div>) : (
+                                                    members.map(m => (
+                                                        // 💡 [수정] 수정 모드일 때와 아닐 때의 UI를 다르게 보여줍니다.
+                                                        editingMember?.id === m.id ? (
+                                                            <div key={m.id} className="flex justify-between items-center bg-blue-50 border border-blue-200 p-3 rounded-xl shadow-sm gap-2">
+                                                                <input type="text" value={editingMember.name} onChange={e => setEditingMember({...editingMember, name: e.target.value})} className="flex-1 px-2 py-1.5 rounded-lg border border-gray-300 text-sm font-bold outline-none focus:border-blue-500" />
+                                                                <input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={editingMember.pin} onChange={e => setEditingMember({...editingMember, pin: e.target.value.replace(/[^0-9]/g, '')})} className="w-16 px-2 py-1.5 rounded-lg border border-gray-300 text-sm text-center tracking-widest font-mono font-bold outline-none focus:border-blue-500" />
+                                                                <div className="flex gap-1 shrink-0">
+                                                                    <button onClick={() => handleUpdateMember(m.id)} className="bg-blue-600 text-white px-2 py-1.5 rounded-lg text-xs font-bold">저장</button>
+                                                                    <button onClick={() => setEditingMember(null)} className="bg-gray-300 text-gray-700 px-2 py-1.5 rounded-lg text-xs font-bold">취소</button>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div key={m.id} className="flex justify-between items-center bg-white border border-gray-200 p-3 rounded-xl shadow-sm">
+                                                                <div className="flex items-center gap-3"><span className="font-bold text-gray-800 text-lg">{m.name}</span><span className="text-xs text-blue-600 font-mono bg-blue-50 border border-blue-100 px-2 py-1 rounded-md">PW: {m.pin}</span></div>
+                                                                <div className="flex gap-1">
+                                                                    <button onClick={() => setEditingMember({id: m.id, name: m.name, pin: m.pin})} className="text-blue-500 p-2 hover:bg-blue-50 rounded-lg transition-colors"><PencilIcon className="w-5 h-5" /></button>
+                                                                    <button onClick={() => handleDeleteMember(m.id)} className="text-red-500 p-2 hover:bg-red-50 rounded-lg transition-colors"><TrashIcon className="w-5 h-5" /></button>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    ))
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -496,7 +537,7 @@
                         <div className="fixed inset-0 bg-black/50 z-50 flex flex-col justify-end print-hide">
                             <div className="bg-white rounded-t-3xl w-full p-6 pb-10 sm:max-w-md sm:mx-auto sm:rounded-3xl sm:mb-10 shadow-2xl animate-[translate-y-full_0.3s_ease-out]">
                                 <div className="flex justify-between items-center mb-6"><h3 className="text-xl font-bold text-gray-800 flex items-center"><ListIcon className="w-6 h-6 mr-2 text-emerald-600" /> 내 봉사 일정</h3><button onClick={() => setIsMyScheduleModalOpen(false)} className="text-gray-400 bg-gray-100 p-2 rounded-full active:bg-gray-200"><XIcon className="w-5 h-5" /></button></div>
-                                <div className="max-h-[50vh] overflow-y-auto pr-2 space-y-3">
+                                <div className="max-h-[50vh] overflow-y-auto pr-2 space-y-3 hide-scroll">
                                     {(() => {
                                         const savedPin = localStorage.getItem('nanum_saved_pin'); const savedName = localStorage.getItem('nanum_saved_name');
                                         if (!savedPin || !savedName) return <div className="text-center py-8 bg-gray-50 rounded-2xl border border-gray-200"><p className="text-gray-500 text-sm font-medium">기억된 내 정보가 없습니다.<br/>먼저 봉사 일정을 한 번 신청해 주세요!</p></div>;
@@ -526,7 +567,7 @@
                         </div>
                     )}
 
-                    {/* 💡 [수정] 신청 폼: 스마트 이름 검색창 적용 */}
+                    {/* 신청 폼 */}
                     {isApplyModalOpen && (
                         <div className="fixed inset-0 bg-black/50 z-50 flex flex-col justify-end">
                             <div className="bg-white rounded-t-3xl w-full p-6 pb-10 sm:max-w-md sm:mx-auto sm:rounded-3xl sm:mb-10 shadow-2xl animate-[translate-y-full_0.3s_ease-out]">
@@ -536,40 +577,15 @@
                                     <div><label className="block text-sm font-bold text-gray-700 mb-2">날짜</label><input type="date" value={targetDate} onChange={(e) => { setTargetDate(e.target.value); setFormError(''); }} className="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-base outline-none focus:border-orange-500 font-bold" /></div>
                                     <div><label className="block text-sm font-bold text-gray-700 mb-2">봉사 분야</label><div className="flex gap-2"><button type="button" onClick={() => setApplicantRole('driver')} className={`flex-1 p-3 rounded-2xl border-2 font-bold ${applicantRole === 'driver' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-100 bg-white text-gray-400'}`}>운전(1명)</button><button type="button" onClick={() => setApplicantRole('general')} className={`flex-1 p-3 rounded-2xl border-2 font-bold ${applicantRole === 'general' ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-100 bg-white text-gray-400'}`}>일반(2명)</button></div></div>
                                     
-                                    {/* 💡 초성 검색창 */}
                                     <div className="relative">
                                         <label className="block text-sm font-bold text-gray-700 mb-2">신청자 이름 <span className="text-orange-500 font-normal text-xs ml-1">(초성 검색 가능)</span></label>
-                                        <input 
-                                            type="text" 
-                                            value={applicantName} 
-                                            onChange={(e) => { setApplicantName(e.target.value); setFormError(''); setShowNameList(true); }} 
-                                            onFocus={() => setShowNameList(true)}
-                                            onBlur={() => setTimeout(() => setShowNameList(false), 200)}
-                                            className="w-full bg-white border border-gray-200 px-4 py-3.5 rounded-xl text-base outline-none focus:border-orange-500 font-bold shadow-inner" 
-                                            placeholder="이름이나 초성을 입력하세요" 
-                                        />
-                                        {/* 자동완성 드롭다운 목록 */}
+                                        <input type="text" value={applicantName} onChange={(e) => { setApplicantName(e.target.value); setFormError(''); setShowNameList(true); }} onFocus={() => setShowNameList(true)} onBlur={() => setTimeout(() => setShowNameList(false), 200)} className="w-full bg-white border border-gray-200 px-4 py-3.5 rounded-xl text-base outline-none focus:border-orange-500 font-bold shadow-inner" placeholder="이름이나 초성을 입력하세요" />
                                         {showNameList && (
                                             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hide-scroll">
                                                 {filteredMembers.map(m => (
-                                                    <div 
-                                                        key={m.id} 
-                                                        onMouseDown={() => { setApplicantName(m.name); setApplicantPin(m.pin); setShowNameList(false); }} 
-                                                        className="px-4 py-3.5 border-b border-gray-50 hover:bg-orange-50 active:bg-orange-100 cursor-pointer flex justify-between items-center transition-colors"
-                                                    >
-                                                        <span className="font-bold text-gray-800 text-lg">{m.name}</span>
-                                                        <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded-md">자동입력</span>
-                                                    </div>
+                                                    <div key={m.id} onMouseDown={() => { setApplicantName(m.name); setApplicantPin(m.pin); setShowNameList(false); }} className="px-4 py-3.5 border-b border-gray-50 hover:bg-orange-50 active:bg-orange-100 cursor-pointer flex justify-between items-center transition-colors"><span className="font-bold text-gray-800 text-lg">{m.name}</span><span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded-md">자동입력</span></div>
                                                 ))}
-                                                {/* 명단에 없는 새 이름일 경우 직접 입력 가능하게 유지 */}
-                                                {applicantName && (
-                                                    <div 
-                                                        onMouseDown={() => { setShowNameList(false); setApplicantPin(''); }} 
-                                                        className="px-4 py-3.5 text-gray-500 hover:bg-gray-50 active:bg-gray-100 cursor-pointer font-medium flex items-center"
-                                                    >
-                                                        <PlusCircleIcon className="w-4 h-4 mr-2" /> "{applicantName}" (으)로 새로 등록
-                                                    </div>
-                                                )}
+                                                {applicantName && <div onMouseDown={() => { setShowNameList(false); setApplicantPin(''); }} className="px-4 py-3.5 text-gray-500 hover:bg-gray-50 active:bg-gray-100 cursor-pointer font-medium flex items-center"><PlusCircleIcon className="w-4 h-4 mr-2" /> "{applicantName}" (으)로 새로 등록</div>}
                                             </div>
                                         )}
                                     </div>
@@ -581,7 +597,7 @@
                         </div>
                     )}
 
-                    {/* 💡 [수정] 수정 폼에도 스마트 이름 검색창 적용 */}
+                    {/* 수정 모달 */}
                     {isEditModalOpen && (
                         <div className="fixed inset-0 bg-black/50 z-50 flex flex-col justify-end">
                             <div className="bg-white rounded-t-3xl w-full p-6 pb-10 sm:max-w-md sm:mx-auto sm:rounded-3xl sm:mb-10 shadow-2xl animate-[translate-y-full_0.3s_ease-out]">
@@ -594,12 +610,20 @@
                                             <div><label className="block text-sm font-bold text-gray-700 mb-2">비밀번호 4자리</label><input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={targetPinInput} onChange={(e) => { setTargetPinInput(e.target.value.replace(/[^0-9]/g, '')); setFormError(''); }} className="w-full bg-gray-50 border border-gray-300 px-4 py-3.5 rounded-xl text-lg outline-none focus:border-blue-500 tracking-[0.5em] text-center font-bold" placeholder="••••" /></div>
                                             <button type="submit" className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-base active:bg-blue-700 shadow-md">정보 불러오기</button>
                                         </form>
+                                        {/* 💡 [추가] 관리자 권한 조회 버튼 */}
+                                        {isAdmin && (
+                                            <div className="mt-4 pt-4 border-t border-gray-200">
+                                                <button type="button" onClick={handleAdminOverrideSearch} className="w-full py-3.5 bg-gray-800 text-white rounded-2xl font-bold shadow-md flex items-center justify-center active:scale-95 transition-transform">
+                                                    👑 관리자 권한으로 모두 보기 (PW 생략)
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                                 {editStep === 2 && (
                                     <div>
                                         <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center"><PencilIcon className="w-6 h-6 mr-2 text-blue-600" /> 수정할 대상 선택</h3>
-                                        <div className="space-y-3 mb-6">
+                                        <div className="space-y-3 mb-6 max-h-[40vh] overflow-y-auto hide-scroll pr-1">
                                             {matchedCandidates.map((c, i) => <button key={i} onClick={() => openEditForm(c)} className="w-full p-4 rounded-2xl border-2 border-gray-200 flex justify-between items-center bg-white active:bg-blue-50 transition-colors"><div className="flex items-center">{c.role === 'driver' ? <CarIcon className="w-5 h-5 mr-3 text-blue-500"/> : <UserIcon className="w-5 h-5 mr-3 text-green-500"/>}<span className="font-bold text-lg text-gray-800">{c.name} <span className="text-sm font-normal text-gray-500 ml-1">({c.role === 'driver' ? '운전' : '일반'})</span></span></div><span className="text-blue-600 text-sm font-bold">선택</span></button>)}
                                         </div>
                                         <button onClick={() => setEditStep(1)} className="w-full py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold text-base">돌아가기</button>
@@ -613,31 +637,19 @@
                                         
                                         <div className="relative">
                                             <label className="block text-sm font-bold text-gray-700 mb-2">이름 수정 <span className="text-blue-500 font-normal text-xs ml-1">(초성 검색)</span></label>
-                                            <input 
-                                                type="text" 
-                                                value={applicantName} 
-                                                onChange={(e) => { setApplicantName(e.target.value); setFormError(''); setShowNameList(true); }} 
-                                                onFocus={() => setShowNameList(true)}
-                                                onBlur={() => setTimeout(() => setShowNameList(false), 200)}
-                                                className="w-full bg-white border border-gray-200 px-4 py-3.5 rounded-xl text-base outline-none focus:border-blue-500 font-bold shadow-inner" 
-                                                placeholder="이름이나 초성을 입력하세요" 
-                                            />
+                                            <input type="text" value={applicantName} onChange={(e) => { setApplicantName(e.target.value); setFormError(''); setShowNameList(true); }} onFocus={() => setShowNameList(true)} onBlur={() => setTimeout(() => setShowNameList(false), 200)} className="w-full bg-white border border-gray-200 px-4 py-3.5 rounded-xl text-base outline-none focus:border-blue-500 font-bold shadow-inner" placeholder="이름이나 초성을 입력하세요" />
                                             {showNameList && (
                                                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hide-scroll">
                                                     {filteredMembers.map(m => (
-                                                        <div key={m.id} onMouseDown={() => { setApplicantName(m.name); setApplicantPin(m.pin); setShowNameList(false); }} className="px-4 py-3.5 border-b border-gray-50 hover:bg-blue-50 active:bg-blue-100 cursor-pointer flex justify-between items-center transition-colors">
-                                                            <span className="font-bold text-gray-800 text-lg">{m.name}</span>
-                                                            <span className="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md">자동입력</span>
-                                                        </div>
+                                                        <div key={m.id} onMouseDown={() => { setApplicantName(m.name); setApplicantPin(m.pin); setShowNameList(false); }} className="px-4 py-3.5 border-b border-gray-50 hover:bg-blue-50 active:bg-blue-100 cursor-pointer flex justify-between items-center transition-colors"><span className="font-bold text-gray-800 text-lg">{m.name}</span><span className="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md">자동입력</span></div>
                                                     ))}
-                                                    {applicantName && (
-                                                        <div onMouseDown={() => { setShowNameList(false); setApplicantPin(''); }} className="px-4 py-3.5 text-gray-500 hover:bg-gray-50 active:bg-gray-100 cursor-pointer font-medium flex items-center">
-                                                            <PlusCircleIcon className="w-4 h-4 mr-2" /> "{applicantName}" (으)로 새로 등록
-                                                        </div>
-                                                    )}
+                                                    {applicantName && <div onMouseDown={() => { setShowNameList(false); setApplicantPin(''); }} className="px-4 py-3.5 text-gray-500 hover:bg-gray-50 active:bg-gray-100 cursor-pointer font-medium flex items-center"><PlusCircleIcon className="w-4 h-4 mr-2" /> "{applicantName}" (으)로 새로 등록</div>}
                                                 </div>
                                             )}
                                         </div>
+                                        
+                                        {/* 💡 [수정] 수정 폼에도 비밀번호 확인창 추가 */}
+                                        <div><label className="block text-sm font-bold text-gray-700 mb-2">비밀번호 확인/수정</label><input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={applicantPin} onChange={(e) => { setApplicantPin(e.target.value.replace(/[^0-9]/g, '')); setFormError(''); }} className="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-base outline-none focus:border-blue-500 tracking-[0.5em] text-center font-bold" placeholder="••••" /></div>
 
                                         <div className="flex gap-2"><button type="button" onClick={() => setEditStep(1)} className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold">다시 찾기</button><button type="submit" className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-md">수정 저장</button></div>
                                     </form>
@@ -653,7 +665,7 @@
                                 {matchedCandidates.length > 0 ? (
                                     <div>
                                         <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center"><TrashIcon className="w-6 h-6 mr-2 text-gray-500" /> 취소할 대상 선택</h3>
-                                        <div className="space-y-3 mb-6">
+                                        <div className="space-y-3 mb-6 max-h-[40vh] overflow-y-auto hide-scroll pr-1">
                                             {matchedCandidates.map((c, i) => <button key={i} onClick={() => executeDelete(c)} className="w-full p-4 rounded-2xl border-2 border-gray-200 flex justify-between items-center bg-white active:bg-red-50 transition-colors"><div className="flex items-center">{c.role === 'driver' ? <CarIcon className="w-5 h-5 mr-3 text-blue-500"/> : <UserIcon className="w-5 h-5 mr-3 text-green-500"/>}<span className="font-bold text-lg text-gray-800">{c.name} <span className="text-sm font-normal text-gray-500 ml-1">({c.role === 'driver' ? '운전' : '일반'})</span></span></div><span className="text-red-500 text-sm font-bold">삭제</span></button>)}
                                         </div>
                                         <button onClick={() => setMatchedCandidates([])} className="w-full py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold">돌아가기</button>
@@ -667,6 +679,14 @@
                                             <div><label className="block text-sm font-bold text-gray-700 mb-2">비밀번호 4자리</label><input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={targetPinInput} onChange={(e) => { setTargetPinInput(e.target.value.replace(/[^0-9]/g, '')); setFormError(''); }} className="w-full bg-gray-50 border border-gray-300 px-4 py-3.5 rounded-xl text-lg outline-none focus:border-red-500 tracking-[0.5em] text-center font-bold" placeholder="••••" /></div>
                                             <div className="flex gap-2 pt-2"><button type="button" onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold">닫기</button><button type="submit" className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold shadow-md">취소 확인</button></div>
                                         </form>
+                                        {/* 💡 [추가] 관리자 권한 조회 버튼 */}
+                                        {isAdmin && (
+                                            <div className="mt-4 pt-4 border-t border-gray-200">
+                                                <button type="button" onClick={handleAdminOverrideSearch} className="w-full py-3.5 bg-gray-800 text-white rounded-2xl font-bold shadow-md flex items-center justify-center active:scale-95 transition-transform">
+                                                    👑 관리자 권한으로 모두 보기 (PW 생략)
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -676,9 +696,7 @@
                     {successDialog.isOpen && (
                         <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 print-hide">
                             <div className="bg-white rounded-3xl w-full max-w-sm p-6 text-center shadow-2xl">
-                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500">
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                </div>
+                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500"><svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">신청이 완료되었습니다!</h3>
                                 <p className="text-sm text-gray-600 mb-6">스마트폰 달력에 일정을 추가해두시면<br/>잊지 않고 참석하실 수 있어요.</p>
                                 <div className="space-y-2.5">
@@ -717,7 +735,7 @@
 
         if ('serviceWorker' in navigator) {
             const swCode = `
-                const CACHE_NAME = 'volunteer-app-v18';
+                const CACHE_NAME = 'volunteer-app-v19';
                 self.addEventListener('install', (event) => self.skipWaiting());
                 self.addEventListener('activate', (event) => self.clients.claim());
                 self.addEventListener('fetch', (event) => {
@@ -730,4 +748,3 @@
     </script>
 </body>
 </html>
-```eof
