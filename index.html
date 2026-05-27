@@ -53,6 +53,12 @@
         
         const DB_COLLECTION = 'nanum_schedules';
 
+        // ==============================================================
+        // ⚙️ 관리자 비밀번호 설정 (비밀번호를 잊어버리셨다면 여기서 바로 수정하세요!)
+        // ==============================================================
+        const ADMIN_PASSWORD = '0000'; 
+        // ==============================================================
+
         const { useState, useEffect } = React;
 
         // --- SVG 아이콘 모음 ---
@@ -112,7 +118,6 @@
             const [members, setMembers] = useState([]);
             const [newMemberName, setNewMemberName] = useState('');
             const [newMemberPin, setNewMemberPin] = useState('');
-            // 💡 [추가] 관리자가 특정 회원의 정보를 수정할 때 사용하는 상태
             const [editingMember, setEditingMember] = useState(null);
             
             const [inputMode, setInputMode] = useState('select'); 
@@ -193,7 +198,8 @@
 
             const handleAdminLogin = (e) => {
                 e.preventDefault();
-                if (adminPwInput === 'joy7709') {
+                // 💡 설정한 ADMIN_PASSWORD 와 비교합니다.
+                if (adminPwInput === ADMIN_PASSWORD) {
                     setIsAdmin(true); setAdminPwInput(''); setFormError('');
                 } else { setFormError('비밀번호가 일치하지 않습니다.'); }
             };
@@ -216,7 +222,6 @@
                 }
             };
 
-            // 💡 [추가] 회원 정보(이름, 비밀번호) 수정 저장 함수
             const handleUpdateMember = async (id) => {
                 if (!editingMember.name.trim() || editingMember.pin.length !== 4) {
                     showToast('이름과 4자리 비밀번호를 정확히 입력하세요.', 'error'); return;
@@ -228,7 +233,6 @@
                 } catch(err) { showToast('오류가 발생했습니다.', 'error'); }
             };
 
-            // 💡 [추가] 관리자용 프리패스 권한 (해당 날짜의 모든 일정을 비밀번호 없이 조회)
             const handleAdminOverrideSearch = () => {
                 if (!targetDate) { setFormError('날짜를 선택해주세요.'); return; }
                 const dayData = schedule[targetDate];
@@ -371,7 +375,6 @@
 
             const openEditForm = (candidate) => {
                 setSelectedEditCandidate(candidate); setApplicantName(candidate.name); setApplicantRole(candidate.originalRole);
-                // 💡 [수정] 수정창을 열 때 기존 회원의 비밀번호도 채워넣습니다.
                 setApplicantPin(candidate.pin || targetPinInput);
                 setEditStep(3); setFormError(''); setMatchedCandidates([]); setShowNameList(false);
             };
@@ -416,7 +419,6 @@
                                 나눔과기쁨 봉사 일정
                             </h1>
                             <div className="flex gap-2 sm:gap-3">
-                                {/* 💡 관리자 로그인 시 톱니바퀴 대신 👑 왕관 아이콘 표시 */}
                                 <button onClick={() => { setIsSettingsModalOpen(true); if(!isAdmin) { setAdminPwInput(''); setFormError(''); } }} className={`bg-white border text-gray-700 px-3 py-2 rounded-full shadow-sm text-sm font-bold active:bg-gray-100 flex items-center transition-colors ${isAdmin ? 'border-orange-500 text-orange-700 bg-orange-50' : 'border-gray-200'}`}>
                                     {isAdmin ? <span className="text-base sm:mr-1">👑</span> : <SettingsIcon className="w-4 h-4 sm:mr-1.5" />}
                                     <span className="hidden sm:inline">관리자</span>
@@ -503,7 +505,6 @@
                                             <div className="space-y-2">
                                                 {members.length === 0 ? (<div className="text-center py-6 text-gray-400 text-sm border border-dashed border-gray-200 rounded-xl">등록된 회원이 없습니다.</div>) : (
                                                     members.map(m => (
-                                                        // 💡 [수정] 수정 모드일 때와 아닐 때의 UI를 다르게 보여줍니다.
                                                         editingMember?.id === m.id ? (
                                                             <div key={m.id} className="flex justify-between items-center bg-blue-50 border border-blue-200 p-3 rounded-xl shadow-sm gap-2">
                                                                 <input type="text" value={editingMember.name} onChange={e => setEditingMember({...editingMember, name: e.target.value})} className="flex-1 px-2 py-1.5 rounded-lg border border-gray-300 text-sm font-bold outline-none focus:border-blue-500" />
@@ -610,7 +611,6 @@
                                             <div><label className="block text-sm font-bold text-gray-700 mb-2">비밀번호 4자리</label><input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={targetPinInput} onChange={(e) => { setTargetPinInput(e.target.value.replace(/[^0-9]/g, '')); setFormError(''); }} className="w-full bg-gray-50 border border-gray-300 px-4 py-3.5 rounded-xl text-lg outline-none focus:border-blue-500 tracking-[0.5em] text-center font-bold" placeholder="••••" /></div>
                                             <button type="submit" className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-base active:bg-blue-700 shadow-md">정보 불러오기</button>
                                         </form>
-                                        {/* 💡 [추가] 관리자 권한 조회 버튼 */}
                                         {isAdmin && (
                                             <div className="mt-4 pt-4 border-t border-gray-200">
                                                 <button type="button" onClick={handleAdminOverrideSearch} className="w-full py-3.5 bg-gray-800 text-white rounded-2xl font-bold shadow-md flex items-center justify-center active:scale-95 transition-transform">
@@ -648,7 +648,6 @@
                                             )}
                                         </div>
                                         
-                                        {/* 💡 [수정] 수정 폼에도 비밀번호 확인창 추가 */}
                                         <div><label className="block text-sm font-bold text-gray-700 mb-2">비밀번호 확인/수정</label><input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={applicantPin} onChange={(e) => { setApplicantPin(e.target.value.replace(/[^0-9]/g, '')); setFormError(''); }} className="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-xl text-base outline-none focus:border-blue-500 tracking-[0.5em] text-center font-bold" placeholder="••••" /></div>
 
                                         <div className="flex gap-2"><button type="button" onClick={() => setEditStep(1)} className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold">다시 찾기</button><button type="submit" className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-md">수정 저장</button></div>
@@ -679,7 +678,6 @@
                                             <div><label className="block text-sm font-bold text-gray-700 mb-2">비밀번호 4자리</label><input type="password" pattern="[0-9]*" inputMode="numeric" maxLength="4" value={targetPinInput} onChange={(e) => { setTargetPinInput(e.target.value.replace(/[^0-9]/g, '')); setFormError(''); }} className="w-full bg-gray-50 border border-gray-300 px-4 py-3.5 rounded-xl text-lg outline-none focus:border-red-500 tracking-[0.5em] text-center font-bold" placeholder="••••" /></div>
                                             <div className="flex gap-2 pt-2"><button type="button" onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold">닫기</button><button type="submit" className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold shadow-md">취소 확인</button></div>
                                         </form>
-                                        {/* 💡 [추가] 관리자 권한 조회 버튼 */}
                                         {isAdmin && (
                                             <div className="mt-4 pt-4 border-t border-gray-200">
                                                 <button type="button" onClick={handleAdminOverrideSearch} className="w-full py-3.5 bg-gray-800 text-white rounded-2xl font-bold shadow-md flex items-center justify-center active:scale-95 transition-transform">
@@ -735,7 +733,7 @@
 
         if ('serviceWorker' in navigator) {
             const swCode = `
-                const CACHE_NAME = 'volunteer-app-v19';
+                const CACHE_NAME = 'volunteer-app-v20';
                 self.addEventListener('install', (event) => self.skipWaiting());
                 self.addEventListener('activate', (event) => self.clients.claim());
                 self.addEventListener('fetch', (event) => {
