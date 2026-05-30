@@ -14,7 +14,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- 💡 [수정] 한 페이지에 완벽하게 맞추기 위해 변환 라이브러리를 변경했습니다. -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
 
@@ -31,6 +30,27 @@
         input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
         .hide-scroll::-webkit-scrollbar { width: 4px; }
         .hide-scroll::-webkit-scrollbar-thumb { background-color: #e5e7eb; border-radius: 10px; }
+        
+        /* 💡 [추가] 글자가 부드럽게 흘러가는 전광판(마키) 애니메이션 효과 */
+        @keyframes scroll-text {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+        .scrolling-wrapper {
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+            background-color: #fff7ed; /* 옅은 주황색 배경 */
+            padding: 8px 0;
+            border-bottom: 1px solid #ffedd5;
+        }
+        .scrolling-content {
+            display: inline-block;
+            animation: scroll-text 15s linear infinite; /* 15초 동안 일정한 속도로 무한 반복 */
+            font-weight: 800;
+            color: #ea580c; /* 진한 주황색 텍스트 */
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body class="bg-gray-50 antialiased overflow-x-hidden selection:bg-orange-200">
@@ -56,15 +76,10 @@
         
         const DB_COLLECTION = 'nanum_schedules';
 
-        // ==============================================================
-        // ⚙️ 관리자 비밀번호 설정 (비밀번호를 잊어버리셨다면 여기서 바로 수정하세요!)
-        // ==============================================================
         const ADMIN_PASSWORD = '0000'; 
-        // ==============================================================
 
         const { useState, useEffect } = React;
 
-        // --- SVG 아이콘 모음 ---
         const ChevronLeft = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="15 18 9 12 15 6"></polyline></svg>;
         const ChevronRight = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 18 15 12 9 6"></polyline></svg>;
         const CarIcon = ({ className }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a2 2 0 0 0-1.6-.8H9.3a2 2 0 0 0-1.6.8L5 11l-5.16.86a1 1 0 0 0-.84.99V16h3m10 0a2 2 0 1 1-4 0m4 0a2 2 0 1 0-4 0m-10 0a2 2 0 1 1-4 0m4 0a2 2 0 1 0-4 0"></path></svg>;
@@ -263,39 +278,58 @@
                 showToast('캘린더 파일이 다운로드되었습니다.', 'info');
             };
 
-            // 💡 [수정] 무조건 A4 한 장에 완벽하게 맞도록 계산하여 PDF를 생성하는 로직
             const handleExportPDF = async () => {
                 const element = document.getElementById('calendar-export-area');
                 if (!element) return;
-                showToast('PDF 변환 중입니다. 잠시만 기다려주세요...', 'info');
+                showToast('고품질 PDF 문서를 생성 중입니다. 잠시만 기다려주세요...', 'info');
                 
                 try {
-                    // 화면 캡처
-                    const canvas = await window.html2canvas(element, { scale: 2, useCORS: true });
-                    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                    const canvas = await window.html2canvas(element, { 
+                        scale: 2, 
+                        useCORS: true,
+                        windowWidth: 1200,
+                        onclone: (clonedDoc) => {
+                            const exportArea = clonedDoc.getElementById('calendar-export-area');
+                            exportArea.style.width = '1200px';
+                            exportArea.style.padding = '30px';
+                            exportArea.style.backgroundColor = '#ffffff';
+
+                            const gridContainer = clonedDoc.querySelector('.grid.grid-cols-7');
+                            if(gridContainer) {
+                                gridContainer.style.backgroundColor = '#9ca3af';
+                                gridContainer.style.border = '2px solid #9ca3af';
+                                gridContainer.style.gap = '2px';
+                            }
+
+                            // 💡 [수정] 5줄일 때는 더 크고 시원하게, 6줄일 때는 살짝 줄여서 한 장에 쏙 들어가게 조절!
+                            const cells = clonedDoc.querySelectorAll('.calendar-cell');
+                            const isFiveRows = cells.length === 35;
+                            cells.forEach(cell => {
+                                cell.style.minHeight = isFiveRows ? '165px' : '135px';
+                            });
+
+                            const hides = clonedDoc.querySelectorAll('.print-hide');
+                            hides.forEach(el => el.style.display = 'none');
+                        }
+                    });
                     
-                    // jsPDF 생성 (A4 가로 방향 지정)
                     const { jsPDF } = window.jspdf;
                     const pdf = new jsPDF('landscape', 'mm', 'a4');
                     
-                    // A4 용지의 가로/세로 길이 및 여백(10mm) 설정
                     const pdfWidth = pdf.internal.pageSize.getWidth();
                     const pdfHeight = pdf.internal.pageSize.getHeight();
-                    const margin = 10;
+                    const margin = 5; 
                     const maxW = pdfWidth - (margin * 2);
                     const maxH = pdfHeight - (margin * 2);
                     
-                    // 캡처한 이미지가 A4 1장에 딱 들어가도록 100% 맞춤 비율 계산
                     const ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
                     const imgW = canvas.width * ratio;
                     const imgH = canvas.height * ratio;
                     
-                    // 정가운데에 배치하기 위한 좌표 계산
                     const x = (pdfWidth - imgW) / 2;
                     const y = (pdfHeight - imgH) / 2;
                     
-                    // 계산된 크기로 이미지 삽입 후 저장
-                    pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
+                    pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG', x, y, imgW, imgH);
                     pdf.save(`${currentDate.getFullYear()}년_${currentDate.getMonth()+1}월_봉사일정.pdf`);
                     
                     showToast('PDF 다운로드가 완료되었습니다.', 'success');
@@ -328,13 +362,19 @@
                 setTimeout(() => setToastMessage({ show: false, message: '', type: '' }), 2500);
             };
 
+            // 💡 [수정] 5줄로 기본 표시하되, 날짜가 꽉 차는 달에만 6줄로 자동 변환하는 똑똑한 함수
             const getCalendarDays = () => {
                 const year = currentDate.getFullYear(); const month = currentDate.getMonth();
                 const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate(); const prevMonthDays = new Date(year, month, 0).getDate();
                 const days = [];
                 for (let i = firstDay - 1; i >= 0; i--) days.push({ date: new Date(year, month - 1, prevMonthDays - i), isCurrentMonth: false });
                 for (let i = 1; i <= daysInMonth; i++) days.push({ date: new Date(year, month, i), isCurrentMonth: true });
-                const remaining = 42 - days.length;
+                
+                // 총 필요한 칸의 개수를 구합니다. 35칸(5줄) 이하로 끝나면 35칸으로, 넘치면 42칸(6줄)으로 자동 설정!
+                const totalCellsNeeded = days.length;
+                const targetCells = totalCellsNeeded > 35 ? 42 : 35;
+                const remaining = targetCells - totalCellsNeeded;
+                
                 for (let i = 1; i <= remaining; i++) days.push({ date: new Date(year, month + 1, i), isCurrentMonth: false });
                 return days;
             };
@@ -454,15 +494,13 @@
 
             return (
                 <div className="min-h-[100dvh] bg-gray-50 flex flex-col font-sans pb-28">
-                    {/* 상단 헤더 */}
-                    <header className="bg-orange-50 px-4 py-5 border-b border-orange-100 flex flex-col gap-4 print-hide">
-                        <div className="flex justify-between items-start">
-                            <h1 className="text-xl sm:text-2xl font-bold text-orange-900 flex items-center">
-                                <img src="IMG_1347.jpeg" alt="로고" className="w-7 h-7 sm:w-8 sm:h-8 mr-2 rounded-full object-cover border border-orange-200 shadow-sm" onError={(e) => { e.target.style.display = 'none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'block'; }} />
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8 mr-2 text-orange-500 hidden"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                나눔과기쁨 봉사 일정
+                    <div id="calendar-export-area" className="bg-white flex-1 flex flex-col w-full h-full">
+                        <header className="px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-100">
+                            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-900 flex items-center">
+                                <img src="IMG_1347.jpeg" alt="로고" className="w-8 h-8 sm:w-10 sm:h-10 mr-2 sm:mr-3 rounded-full border border-orange-200 shadow-sm" onError={(e) => { e.target.style.display = 'none'; }} />
+                                나눔과기쁨 봉사 일정표
                             </h1>
-                            <div className="flex gap-2 sm:gap-3">
+                            <div className="flex gap-2 sm:gap-3 print-hide">
                                 <button onClick={() => { setIsSettingsModalOpen(true); if(!isAdmin) { setAdminPwInput(''); setFormError(''); } }} className={`bg-white border text-gray-700 px-3 py-2 rounded-full shadow-sm text-sm font-bold active:bg-gray-100 flex items-center transition-colors ${isAdmin ? 'border-orange-500 text-orange-700 bg-orange-50' : 'border-gray-200'}`}>
                                     {isAdmin ? <span className="text-base sm:mr-1">👑</span> : <SettingsIcon className="w-4 h-4 sm:mr-1.5" />}
                                     <span className="hidden sm:inline">관리자</span>
@@ -470,46 +508,54 @@
                                 <button onClick={handleRefresh} className="bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-full shadow-sm text-sm font-bold active:bg-gray-100 flex items-center transition-colors"><RefreshIcon className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">동기화</span></button>
                                 <button onClick={handleExportPDF} className="bg-orange-600 text-white px-3 py-2 rounded-full shadow-sm text-sm font-bold active:bg-orange-700 flex items-center transition-colors"><PrinterIcon className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">출력(PDF)</span></button>
                             </div>
-                        </div>
-                    </header>
+                        </header>
 
-                    {authError && <div className="bg-red-50 border-l-4 border-red-500 p-4 m-4 rounded-md shadow-sm print-hide"><p className="text-sm font-bold text-red-700">{authError}</p></div>}
+                        {/* 💡 [수정] 입력이 활성화되지 않은(잠긴) 달에만 언제 오픈되는지 알려주는 전광판 표시 */}
+                        {!canApply && (
+                            <div className="scrolling-wrapper print-hide">
+                                <div className="scrolling-content">
+                                    📢 {currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월 봉사 일정은 [ {openDate.getMonth() + 1}월 {openDate.getDate()}일 ] 부터 입력이 가능합니다! 잊지 말고 신청해 주세요 😊
+                                </div>
+                            </div>
+                        )}
 
-                    {/* 메인 달력 구역 */}
-                    <div id="calendar-export-area" className="flex-1 bg-gray-50 pt-4 pb-4">
-                        <div className="flex items-center bg-white rounded-full p-1 shadow-sm border border-gray-200 justify-between max-w-sm mx-auto w-full mb-2 print-hide">
-                            <button onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)); setSelectedDateStr(''); }} className="p-2 text-orange-600 active:bg-orange-100 rounded-full"><ChevronLeft className="w-5 h-5" /></button>
-                            <span className="font-bold text-gray-800 text-lg">{currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월 봉사일정</span>
-                            <button onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)); setSelectedDateStr(''); }} className="p-2 text-orange-600 active:bg-orange-100 rounded-full"><ChevronRight className="w-5 h-5" /></button>
-                        </div>
-                        <div className="bg-transparent px-4 py-2 flex gap-3 text-xs text-gray-600 justify-end max-w-5xl mx-auto">
-                            <div className="flex items-center"><span className="w-2.5 h-2.5 bg-blue-100 border border-blue-200 rounded-full mr-1.5"></span>운전(1명)</div>
-                            <div className="flex items-center"><span className="w-2.5 h-2.5 bg-green-100 border border-green-200 rounded-full mr-1.5"></span>일반(2명)</div>
-                        </div>
-                        <div className="px-2 sm:px-4">
-                            <div className="grid grid-cols-7 bg-gray-200 border border-gray-200 gap-[1px] rounded-xl overflow-hidden max-w-5xl mx-auto shadow-sm">
-                                {weekDays.map((day, index) => <div key={`header-${day}`} className={`bg-gray-50 py-2 text-center font-bold text-sm ${index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : 'text-gray-700'}`}>{day}</div>)}
-                                {getCalendarDays().map((dayObj, index) => {
-                                    const date = dayObj.date; const dateStr = formatDate(date); const daySchedule = dayObj.isCurrentMonth ? (schedule[dateStr] || { driver: null, general: [] }) : null;
-                                    const isSelected = selectedDateStr === dateStr; const isToday = dayObj.isCurrentMonth && (formatDate(new Date()) === dateStr);
-                                    const dayOfWeek = date.getDay(); const holidayName = HOLIDAYS[dateStr]; const isDayOff = dayOfWeek === 0 || dayOfWeek === 6 || !!holidayName; 
+                        <div className="flex-1 pt-6 pb-8 px-2 sm:px-4">
+                            <div className="flex items-center justify-center mb-6 gap-4 sm:gap-8">
+                                <button onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)); setSelectedDateStr(''); }} className="p-2 text-orange-600 active:bg-orange-100 rounded-full print-hide"><ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" /></button>
+                                <h2 className="font-extrabold text-gray-800 text-2xl sm:text-3xl tracking-wide">{currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월</h2>
+                                <button onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)); setSelectedDateStr(''); }} className="p-2 text-orange-600 active:bg-orange-100 rounded-full print-hide"><ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" /></button>
+                            </div>
+                            
+                            <div className="flex justify-end gap-3 max-w-6xl mx-auto px-4 mb-3 text-xs sm:text-sm font-bold text-gray-600">
+                                <div className="flex items-center"><span className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-100 border border-blue-300 rounded-full mr-1.5"></span>운전(1명)</div>
+                                <div className="flex items-center"><span className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-100 border border-green-300 rounded-full mr-1.5"></span>일반(2명)</div>
+                            </div>
+                            
+                            <div className="max-w-6xl mx-auto">
+                                <div className="grid grid-cols-7 bg-gray-400 border-2 border-gray-400 gap-[1.5px] rounded-xl overflow-hidden shadow-sm">
+                                    {weekDays.map((day, index) => <div key={`header-${day}`} className={`bg-gray-100 py-2.5 sm:py-3 text-center font-extrabold text-sm sm:text-base ${index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : 'text-gray-800'}`}>{day}</div>)}
+                                    {getCalendarDays().map((dayObj, index) => {
+                                        const date = dayObj.date; const dateStr = formatDate(date); const daySchedule = dayObj.isCurrentMonth ? (schedule[dateStr] || { driver: null, general: [] }) : null;
+                                        const isSelected = selectedDateStr === dateStr; const isToday = dayObj.isCurrentMonth && (formatDate(new Date()) === dateStr);
+                                        const dayOfWeek = date.getDay(); const holidayName = HOLIDAYS[dateStr]; const isDayOff = dayOfWeek === 0 || dayOfWeek === 6 || !!holidayName; 
 
-                                    return (
-                                        <div key={`${dateStr}-${index}`} onClick={() => handleDayClick(dayObj)} className={`bg-white min-h-[85px] sm:min-h-[100px] p-1 sm:p-2 relative transition-all flex flex-col ${!dayObj.isCurrentMonth ? '' : (canApply && !isDayOff ? 'cursor-pointer active:bg-orange-50' : 'cursor-not-allowed opacity-80 bg-gray-50/30')} ${isSelected ? 'ring-4 ring-inset ring-orange-500 bg-orange-50 z-10' : (isToday ? 'ring-2 ring-inset ring-orange-200' : '')}`}>
-                                            <div className={`text-base sm:text-lg mb-1 pl-0.5 flex flex-col ${!dayObj.isCurrentMonth ? 'text-gray-300 font-normal' : (dayOfWeek === 0 || holidayName ? 'text-red-500 font-bold' : dayOfWeek === 6 ? 'text-blue-500 font-bold' : 'text-gray-800 font-bold')}`}>
-                                                <span>{date.getDate()}</span>
-                                                {dayObj.isCurrentMonth && holidayName && <span className="text-[9px] sm:text-[10px] text-red-400 font-normal leading-none mt-0.5">{holidayName}</span>}
-                                            </div>
-                                            {dayObj.isCurrentMonth && daySchedule && (
-                                                <div className="space-y-0.5 mt-auto">
-                                                    {daySchedule.driver && <div className="bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-sm rounded px-1.5 py-0.5 truncate flex items-center"><CarIcon className="w-3.5 h-3.5 mr-1 shrink-0 print-hide"/>{daySchedule.driver.name}</div>}
-                                                    {!daySchedule.driver && !isDayOff && <div className="border border-dashed border-orange-300 text-orange-500 bg-orange-50/50 text-xs sm:text-sm rounded px-1.5 py-0.5 text-center print-hide">운전자 필요</div>}
-                                                    {daySchedule.general.map((p, i) => <div key={i} className="bg-green-50 border border-green-100 text-green-700 text-xs sm:text-sm rounded px-1.5 py-0.5 truncate flex items-center"><UserIcon className="w-3.5 h-3.5 mr-1 shrink-0 print-hide"/>{p.name}</div>)}
+                                        return (
+                                            <div key={`${dateStr}-${index}`} onClick={() => handleDayClick(dayObj)} className={`calendar-cell bg-white min-h-[85px] sm:min-h-[110px] md:min-h-[125px] p-1.5 sm:p-2.5 relative transition-all flex flex-col ${!dayObj.isCurrentMonth ? '' : (canApply && !isDayOff ? 'cursor-pointer active:bg-orange-50' : 'cursor-not-allowed opacity-80 bg-gray-50/30')} ${isSelected ? 'ring-4 ring-inset ring-orange-500 bg-orange-50 z-10' : (isToday ? 'ring-2 ring-inset ring-orange-200' : '')}`}>
+                                                <div className={`text-base sm:text-lg mb-1.5 pl-1 flex flex-col ${!dayObj.isCurrentMonth ? 'text-gray-300 font-normal' : (dayOfWeek === 0 || holidayName ? 'text-red-500 font-bold' : dayOfWeek === 6 ? 'text-blue-500 font-bold' : 'text-gray-800 font-bold')}`}>
+                                                    <span>{date.getDate()}</span>
+                                                    {dayObj.isCurrentMonth && holidayName && <span className="text-[9px] sm:text-[11px] text-red-400 font-medium leading-none mt-1">{holidayName}</span>}
                                                 </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                                                {dayObj.isCurrentMonth && daySchedule && (
+                                                    <div className="space-y-1 mt-auto">
+                                                        {daySchedule.driver && <div className="bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-sm rounded-md px-1.5 py-1 truncate flex items-center font-medium shadow-sm"><CarIcon className="w-3.5 h-3.5 mr-1.5 shrink-0 print-hide"/>{daySchedule.driver.name}</div>}
+                                                        {!daySchedule.driver && !isDayOff && <div className="border border-dashed border-orange-300 text-orange-500 bg-orange-50/50 text-xs sm:text-sm rounded-md px-1.5 py-1 text-center font-medium print-hide">운전자 필요</div>}
+                                                        {daySchedule.general.map((p, i) => <div key={i} className="bg-green-50 border border-green-100 text-green-700 text-xs sm:text-sm rounded-md px-1.5 py-1 truncate flex items-center font-medium shadow-sm"><UserIcon className="w-3.5 h-3.5 mr-1.5 shrink-0 print-hide"/>{p.name}</div>)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -777,7 +823,7 @@
 
         if ('serviceWorker' in navigator) {
             const swCode = `
-                const CACHE_NAME = 'volunteer-app-v22';
+                const CACHE_NAME = 'volunteer-app-v27';
                 self.addEventListener('install', (event) => self.skipWaiting());
                 self.addEventListener('activate', (event) => self.clients.claim());
                 self.addEventListener('fetch', (event) => {
