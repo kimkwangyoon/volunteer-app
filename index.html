@@ -31,7 +31,6 @@
         .hide-scroll::-webkit-scrollbar { width: 4px; }
         .hide-scroll::-webkit-scrollbar-thumb { background-color: #e5e7eb; border-radius: 10px; }
         
-        /* 💡 [추가] 글자가 부드럽게 흘러가는 전광판(마키) 애니메이션 효과 */
         @keyframes scroll-text {
             0% { transform: translateX(100vw); }
             100% { transform: translateX(-100%); }
@@ -40,15 +39,15 @@
             overflow: hidden;
             white-space: nowrap;
             width: 100%;
-            background-color: #fff7ed; /* 옅은 주황색 배경 */
+            background-color: #fff7ed;
             padding: 8px 0;
             border-bottom: 1px solid #ffedd5;
         }
         .scrolling-content {
             display: inline-block;
-            animation: scroll-text 15s linear infinite; /* 15초 동안 일정한 속도로 무한 반복 */
+            animation: scroll-text 15s linear infinite;
             font-weight: 800;
-            color: #ea580c; /* 진한 주황색 텍스트 */
+            color: #ea580c;
             font-size: 0.9rem;
         }
     </style>
@@ -75,7 +74,6 @@
         const db = getFirestore(app);
         
         const DB_COLLECTION = 'nanum_schedules';
-
         const ADMIN_PASSWORD = '0000'; 
 
         const { useState, useEffect } = React;
@@ -157,7 +155,7 @@
             const [toastMessage, setToastMessage] = useState({ show: false, message: '', type: '' });
             const [authError, setAuthError] = useState(''); 
             
-            const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+            const weekDays = ['월', '화', '수', '목', '금', '토'];
 
             const today = new Date();
             today.setHours(0, 0, 0, 0); 
@@ -294,16 +292,15 @@
                             exportArea.style.padding = '30px';
                             exportArea.style.backgroundColor = '#ffffff';
 
-                            const gridContainer = clonedDoc.querySelector('.grid.grid-cols-7');
+                            const gridContainer = clonedDoc.querySelector('.grid.grid-cols-6');
                             if(gridContainer) {
                                 gridContainer.style.backgroundColor = '#9ca3af';
                                 gridContainer.style.border = '2px solid #9ca3af';
                                 gridContainer.style.gap = '2px';
                             }
 
-                            // 💡 [수정] 5줄일 때는 더 크고 시원하게, 6줄일 때는 살짝 줄여서 한 장에 쏙 들어가게 조절!
                             const cells = clonedDoc.querySelectorAll('.calendar-cell');
-                            const isFiveRows = cells.length === 35;
+                            const isFiveRows = cells.length === 30;
                             cells.forEach(cell => {
                                 cell.style.minHeight = isFiveRows ? '165px' : '135px';
                             });
@@ -362,21 +359,29 @@
                 setTimeout(() => setToastMessage({ show: false, message: '', type: '' }), 2500);
             };
 
-            // 💡 [수정] 5줄로 기본 표시하되, 날짜가 꽉 차는 달에만 6줄로 자동 변환하는 똑똑한 함수
             const getCalendarDays = () => {
                 const year = currentDate.getFullYear(); const month = currentDate.getMonth();
-                const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate(); const prevMonthDays = new Date(year, month, 0).getDate();
-                const days = [];
-                for (let i = firstDay - 1; i >= 0; i--) days.push({ date: new Date(year, month - 1, prevMonthDays - i), isCurrentMonth: false });
-                for (let i = 1; i <= daysInMonth; i++) days.push({ date: new Date(year, month, i), isCurrentMonth: true });
+                const firstDay = new Date(year, month, 1).getDay(); 
                 
-                // 총 필요한 칸의 개수를 구합니다. 35칸(5줄) 이하로 끝나면 35칸으로, 넘치면 42칸(6줄)으로 자동 설정!
-                const totalCellsNeeded = days.length;
-                const targetCells = totalCellsNeeded > 35 ? 42 : 35;
-                const remaining = targetCells - totalCellsNeeded;
+                let startDay = firstDay === 0 ? 6 : firstDay - 1; 
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const prevMonthDays = new Date(year, month, 0).getDate();
                 
-                for (let i = 1; i <= remaining; i++) days.push({ date: new Date(year, month + 1, i), isCurrentMonth: false });
-                return days;
+                const allDays = [];
+                for (let i = startDay - 1; i >= 0; i--) {
+                    allDays.push({ date: new Date(year, month - 1, prevMonthDays - i), isCurrentMonth: false });
+                }
+                for (let i = 1; i <= daysInMonth; i++) {
+                    allDays.push({ date: new Date(year, month, i), isCurrentMonth: true });
+                }
+                let remainder = allDays.length % 7;
+                let nextDay = 1;
+                while (remainder !== 0 || allDays.length < 35) {
+                    allDays.push({ date: new Date(year, month + 1, nextDay++), isCurrentMonth: false });
+                    remainder = allDays.length % 7;
+                }
+                
+                return allDays.filter(d => d.date.getDay() !== 0); 
             };
 
             const handleDayClick = (dayObj) => {
@@ -510,7 +515,6 @@
                             </div>
                         </header>
 
-                        {/* 💡 [수정] 입력이 활성화되지 않은(잠긴) 달에만 언제 오픈되는지 알려주는 전광판 표시 */}
                         {!canApply && (
                             <div className="scrolling-wrapper print-hide">
                                 <div className="scrolling-content">
@@ -532,24 +536,41 @@
                             </div>
                             
                             <div className="max-w-6xl mx-auto">
-                                <div className="grid grid-cols-7 bg-gray-400 border-2 border-gray-400 gap-[1.5px] rounded-xl overflow-hidden shadow-sm">
-                                    {weekDays.map((day, index) => <div key={`header-${day}`} className={`bg-gray-100 py-2.5 sm:py-3 text-center font-extrabold text-sm sm:text-base ${index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : 'text-gray-800'}`}>{day}</div>)}
+                                <div className="grid grid-cols-6 bg-gray-400 border-2 border-gray-400 gap-[1.5px] rounded-xl overflow-hidden shadow-sm">
+                                    {/* 💡 요일 헤더 반응형 폰트 적용 */}
+                                    {weekDays.map((day, index) => <div key={`header-${day}`} className={`bg-gray-100 py-2 sm:py-3 text-center font-extrabold text-xs min-[380px]:text-sm sm:text-base lg:text-lg ${index === 5 ? 'text-blue-600' : 'text-gray-800'}`}>{day}</div>)}
                                     {getCalendarDays().map((dayObj, index) => {
                                         const date = dayObj.date; const dateStr = formatDate(date); const daySchedule = dayObj.isCurrentMonth ? (schedule[dateStr] || { driver: null, general: [] }) : null;
                                         const isSelected = selectedDateStr === dateStr; const isToday = dayObj.isCurrentMonth && (formatDate(new Date()) === dateStr);
                                         const dayOfWeek = date.getDay(); const holidayName = HOLIDAYS[dateStr]; const isDayOff = dayOfWeek === 0 || dayOfWeek === 6 || !!holidayName; 
 
                                         return (
-                                            <div key={`${dateStr}-${index}`} onClick={() => handleDayClick(dayObj)} className={`calendar-cell bg-white min-h-[85px] sm:min-h-[110px] md:min-h-[125px] p-1.5 sm:p-2.5 relative transition-all flex flex-col ${!dayObj.isCurrentMonth ? '' : (canApply && !isDayOff ? 'cursor-pointer active:bg-orange-50' : 'cursor-not-allowed opacity-80 bg-gray-50/30')} ${isSelected ? 'ring-4 ring-inset ring-orange-500 bg-orange-50 z-10' : (isToday ? 'ring-2 ring-inset ring-orange-200' : '')}`}>
-                                                <div className={`text-base sm:text-lg mb-1.5 pl-1 flex flex-col ${!dayObj.isCurrentMonth ? 'text-gray-300 font-normal' : (dayOfWeek === 0 || holidayName ? 'text-red-500 font-bold' : dayOfWeek === 6 ? 'text-blue-500 font-bold' : 'text-gray-800 font-bold')}`}>
+                                            <div key={`${dateStr}-${index}`} onClick={() => handleDayClick(dayObj)} className={`calendar-cell bg-white min-h-[75px] min-[380px]:min-h-[85px] sm:min-h-[110px] md:min-h-[130px] lg:min-h-[150px] p-1 sm:p-2 md:p-3 relative transition-all flex flex-col ${!dayObj.isCurrentMonth ? '' : (canApply && !isDayOff ? 'cursor-pointer active:bg-orange-50' : 'cursor-not-allowed opacity-80 bg-gray-50/30')} ${isSelected ? 'ring-4 ring-inset ring-orange-500 bg-orange-50 z-10' : (isToday ? 'ring-2 ring-inset ring-orange-200' : '')}`}>
+                                                {/* 💡 날짜 숫자 반응형 폰트 적용 */}
+                                                <div className={`text-sm min-[380px]:text-base sm:text-lg md:text-xl lg:text-2xl mb-1 pl-0.5 sm:pl-1 flex flex-col ${!dayObj.isCurrentMonth ? 'text-gray-300 font-normal' : (holidayName ? 'text-red-500 font-extrabold' : dayOfWeek === 6 ? 'text-blue-500 font-extrabold' : 'text-gray-800 font-extrabold')}`}>
                                                     <span>{date.getDate()}</span>
-                                                    {dayObj.isCurrentMonth && holidayName && <span className="text-[9px] sm:text-[11px] text-red-400 font-medium leading-none mt-1">{holidayName}</span>}
+                                                    {dayObj.isCurrentMonth && holidayName && <span className="text-[8px] min-[380px]:text-[9px] sm:text-[11px] md:text-xs lg:text-sm text-red-400 font-bold leading-none mt-0.5 md:mt-1">{holidayName}</span>}
                                                 </div>
                                                 {dayObj.isCurrentMonth && daySchedule && (
-                                                    <div className="space-y-1 mt-auto">
-                                                        {daySchedule.driver && <div className="bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-sm rounded-md px-1.5 py-1 truncate flex items-center font-medium shadow-sm"><CarIcon className="w-3.5 h-3.5 mr-1.5 shrink-0 print-hide"/>{daySchedule.driver.name}</div>}
-                                                        {!daySchedule.driver && !isDayOff && <div className="border border-dashed border-orange-300 text-orange-500 bg-orange-50/50 text-xs sm:text-sm rounded-md px-1.5 py-1 text-center font-medium print-hide">운전자 필요</div>}
-                                                        {daySchedule.general.map((p, i) => <div key={i} className="bg-green-50 border border-green-100 text-green-700 text-xs sm:text-sm rounded-md px-1.5 py-1 truncate flex items-center font-medium shadow-sm"><UserIcon className="w-3.5 h-3.5 mr-1.5 shrink-0 print-hide"/>{p.name}</div>)}
+                                                    <div className="space-y-0.5 sm:space-y-1 lg:space-y-1.5 mt-auto">
+                                                        {/* 💡 이름 및 아이콘 크기 반응형 완벽 적용 (스마트폰 세로 최소 폰트부터 PDF 출력용 최대 폰트까지) */}
+                                                        {daySchedule.driver && (
+                                                            <div className="bg-blue-50 border border-blue-200 text-blue-800 text-[10px] min-[380px]:text-[11px] sm:text-sm md:text-base lg:text-lg rounded-sm sm:rounded-md px-1 py-0.5 sm:px-1.5 sm:py-1 md:px-2 md:py-1.5 truncate flex items-center font-bold shadow-sm">
+                                                                <CarIcon className="w-2.5 h-2.5 min-[380px]:w-3 min-[380px]:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-0.5 sm:mr-1 md:mr-1.5 shrink-0 print-hide text-blue-500"/>
+                                                                {daySchedule.driver.name}
+                                                            </div>
+                                                        )}
+                                                        {!daySchedule.driver && !isDayOff && (
+                                                            <div className="border border-dashed border-orange-300 text-orange-600 bg-orange-50/50 text-[10px] min-[380px]:text-[11px] sm:text-sm md:text-base lg:text-lg rounded-sm sm:rounded-md px-1 py-0.5 sm:px-1.5 sm:py-1 md:px-2 md:py-1.5 text-center font-bold print-hide tracking-tighter sm:tracking-normal">
+                                                                운전필요
+                                                            </div>
+                                                        )}
+                                                        {daySchedule.general.map((p, i) => (
+                                                            <div key={i} className="bg-green-50 border border-green-200 text-green-800 text-[10px] min-[380px]:text-[11px] sm:text-sm md:text-base lg:text-lg rounded-sm sm:rounded-md px-1 py-0.5 sm:px-1.5 sm:py-1 md:px-2 md:py-1.5 truncate flex items-center font-bold shadow-sm">
+                                                                <UserIcon className="w-2.5 h-2.5 min-[380px]:w-3 min-[380px]:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-0.5 sm:mr-1 md:mr-1.5 shrink-0 print-hide text-green-500"/>
+                                                                {p.name}
+                                                            </div>
+                                                        ))}
                                                     </div>
                                                 )}
                                             </div>
@@ -641,7 +662,7 @@
                                         mySchedules.sort((a, b) => new Date(a.date) - new Date(b.date));
                                         if (mySchedules.length === 0) return <div className="text-center py-8 bg-gray-50 rounded-2xl border border-gray-200"><p className="text-gray-500 text-sm font-medium">현재 예약된 봉사 일정이 없습니다.</p></div>;
                                         return mySchedules.map((item, idx) => {
-                                            const d = new Date(item.date); const dayStr = weekDays[d.getDay()];
+                                            const d = new Date(item.date); const dayStr = weekDays[d.getDay() === 0 ? 5 : d.getDay() - 1];
                                             return (
                                                 <div key={idx} className="p-4 bg-white border border-gray-200 rounded-2xl shadow-sm flex items-center justify-between">
                                                     <div><p className="font-bold text-gray-800 text-lg">{d.getMonth() + 1}월 {d.getDate()}일 <span className="text-sm font-normal text-gray-500">({dayStr})</span></p><p className="text-sm text-gray-600 mt-0.5">{item.name}님</p></div>
@@ -823,7 +844,7 @@
 
         if ('serviceWorker' in navigator) {
             const swCode = `
-                const CACHE_NAME = 'volunteer-app-v27';
+                const CACHE_NAME = 'volunteer-app-v29';
                 self.addEventListener('install', (event) => self.skipWaiting());
                 self.addEventListener('activate', (event) => self.clients.claim());
                 self.addEventListener('fetch', (event) => {
