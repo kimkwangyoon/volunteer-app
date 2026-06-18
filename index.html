@@ -562,7 +562,8 @@
                                     {weekDays.map((day, index) => <div key={`header-${day}`} className={`bg-gray-100 py-2 sm:py-3 text-center font-extrabold text-xs min-[380px]:text-sm sm:text-base lg:text-lg text-gray-800`}>{day}</div>)}
                                     {getCalendarDays().map((dayObj, index) => {
                                         const date = dayObj.date; const dateStr = formatDate(date); 
-                                        const daySchedule = dayObj.isCurrentMonth ? (schedule[dateStr] || null) : null;
+                                        // 💡 [수정] 아무도 신청하지 않은 빈 날짜에도 기본적으로 '운전필요' 틀이 보이도록 빈 배열을 기본값으로 설정!
+                                        const daySchedule = dayObj.isCurrentMonth ? (schedule[dateStr] || { driver: null, general: [] }) : null;
                                         const isSelected = selectedDateStr === dateStr; const isToday = dayObj.isCurrentMonth && (formatDate(new Date()) === dateStr);
                                         const holidayName = HOLIDAYS[dateStr]; const isDayOff = !!holidayName; 
 
@@ -582,7 +583,7 @@
                                                         )}
                                                         {!daySchedule.driver && !isDayOff && (
                                                             <div className="border border-dashed border-orange-300 text-orange-600 bg-orange-50/50 text-[10px] min-[380px]:text-[11px] sm:text-sm md:text-base lg:text-lg rounded-sm sm:rounded-md px-1 py-0.5 sm:px-1.5 sm:py-1 md:px-2 md:py-1.5 text-center font-bold print-hide tracking-tighter sm:tracking-normal">
-                                                                운전필요
+                                                                운전자 필요
                                                             </div>
                                                         )}
                                                         {(daySchedule.general ? daySchedule.general : []).map((p, i) => (
@@ -867,7 +868,7 @@
         if ('serviceWorker' in navigator) {
             try {
                 const swCode = `
-                    const CACHE_NAME = 'volunteer-app-v37';
+                    const CACHE_NAME = 'volunteer-app-v39';
                     self.addEventListener('install', (event) => self.skipWaiting());
                     self.addEventListener('activate', (event) => self.clients.claim());
                     self.addEventListener('fetch', (event) => {
