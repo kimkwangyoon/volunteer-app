@@ -164,8 +164,8 @@
             
             const weekDays = ['월', '화', '수', '목', '금'];
 
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); 
+            // 💡 [수정] 오전 9시 기준을 맞추기 위해 실제 현재 시간(now)을 가져옵니다.
+            const now = new Date(); 
             
             // 💡 [업데이트] 27일을 기준으로 설정
             const openDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 27);
@@ -177,9 +177,14 @@
                 openDate.setDate(openDate.getDate() + 1); // 하루 늦춰서 월요일로!
             }
             
+            // 💡 [추가] 신청 오픈 시간을 "오전 9시"로 고정합니다. (9시, 0분, 0초, 0밀리초)
+            openDate.setHours(9, 0, 0, 0);
+
             const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            const isPastOrCurrent = currentMonthStart.getTime() <= new Date(today.getFullYear(), today.getMonth(), 1).getTime();
-            const canApply = isPastOrCurrent || (today.getTime() >= openDate.getTime());
+            const isPastOrCurrent = currentMonthStart.getTime() <= new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+            
+            // 💡 [수정] 정확한 현재 시간(now.getTime())이 오픈 시간(오전 9시)을 넘었는지 확인합니다.
+            const canApply = isPastOrCurrent || (now.getTime() >= openDate.getTime());
 
             const loadSavedInfo = () => {
                 const savedName = localStorage.getItem('nanum_saved_name');
@@ -406,7 +411,7 @@
 
             const handleDayClick = (dayObj) => {
                 if (!dayObj.isCurrentMonth) { setSelectedDateStr(''); return; }
-                if (!canApply) { showToast('지금은 입력할 수 없습니다.', 'error'); return; }
+                if (!canApply) { showToast('아직 신청 기간이 아닙니다. (오전 9시 오픈)', 'error'); return; }
 
                 const date = dayObj.date; const dateStr = formatDate(date); const isHoliday = !!HOLIDAYS[dateStr]; 
                 if (date.getDay() === 0 || date.getDay() === 6 || isHoliday) { showToast('주말 및 공휴일은 봉사가 없습니다.', 'error'); return; }
@@ -534,19 +539,19 @@
                                 </button>
                                 <button onClick={handleRefresh} className="bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-full shadow-sm text-sm font-bold active:bg-gray-100 flex items-center transition-colors"><RefreshIcon className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">동기화</span></button>
                                 <button onClick={handleExportPDF} className="bg-orange-600 text-white px-3 py-2 rounded-full shadow-sm text-sm font-bold active:bg-orange-700 flex items-center transition-colors"><PrinterIcon className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">출력(PDF)</span></button>
-                            </div>
-                        </header>
+                        </div>
+                    </header>
 
-                        {!canApply && (
-                            <div className="scrolling-wrapper print-hide">
-                                <div className="scrolling-content">
-                                    📢 {currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월 봉사 일정은 [ {openDate.getMonth() + 1}월 {openDate.getDate()}일 ] 부터 입력이 가능합니다! 잊지 말고 신청해 주세요 😊
-                                </div>
+                    {!canApply && (
+                        <div className="scrolling-wrapper print-hide">
+                            <div className="scrolling-content">
+                                📢 {currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월 봉사 일정은 [ {openDate.getMonth() + 1}월 {openDate.getDate()}일 오전 9시 ] 부터 입력이 가능합니다! 잊지 말고 신청해 주세요 😊
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        <div className="flex-1 pt-6 pb-8 px-2 sm:px-4">
-                            <div className="flex items-center justify-center mb-6 gap-4 sm:gap-8">
+                    <div className="flex-1 pt-6 pb-8 px-2 sm:px-4">
+                        <div className="flex items-center justify-center mb-6 gap-4 sm:gap-8">
                                 <button onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)); setSelectedDateStr(''); }} className="p-2 text-orange-600 active:bg-orange-100 rounded-full print-hide"><ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" /></button>
                                 <h2 className="font-extrabold text-gray-800 text-2xl sm:text-3xl tracking-wide">{currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월</h2>
                                 <button onClick={() => { setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)); setSelectedDateStr(''); }} className="p-2 text-orange-600 active:bg-orange-100 rounded-full print-hide"><ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" /></button>
@@ -868,7 +873,7 @@
         if ('serviceWorker' in navigator) {
             try {
                 const swCode = `
-                    const CACHE_NAME = 'volunteer-app-v39';
+                    const CACHE_NAME = 'volunteer-app-v40';
                     self.addEventListener('install', (event) => self.skipWaiting());
                     self.addEventListener('activate', (event) => self.clients.claim());
                     self.addEventListener('fetch', (event) => {
